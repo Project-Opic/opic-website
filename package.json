@@ -1,0 +1,26 @@
+{
+  "name": "@opic/website",
+  "description": "OPIC 开放智能算力平台官网与文档（Docusaurus 3）",
+  "license": "Apache-2.0",
+  "private": true,
+  "version": "0.1.0",
+  "engines": { "node": ">=20.0.0" },
+  "scripts": {
+    "docusaurus": "docusaurus",
+    "start": "docusaurus start",
+    "build": "NODE_OPTIONS=--max-old-space-size=6144 docusaurus build",
+    "build:fast": "NODE_OPTIONS=--max-old-space-size=6144 docusaurus build --no-minify",
+    "serve": "docusaurus serve",
+    "clear": "docusaurus clear",
+    "write-translations": "docusaurus write-translations"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.7.0",
+    "@docusaurus/preset-classic": "^3.7.0",
+    "prism-react-renderer": "^2.4.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {},
+  "browserslist": { "production": [">0.5%", "not dead", "not op_mini all"], "development": ["last 3 chrome version", "last 3 firefox version", "last 5 safari version"] }
+}

@@ -1,0 +1,18 @@
+:root {
+  --ifm-color-primary: #1a3a6b;
+  --ifm-color-primary-dark: #16325c;
+  --ifm-color-primary-darker: #142f56;
+  --ifm-color-primary-darkest: #112747;
+  --ifm-color-primary-light: #24467f;
+  --ifm-color-primary-lighter: #2a4f8c;
+  --ifm-color-primary-lightest: #3861a8;
+  --ifm-font-family-base: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ifm-code-font-size: 92%;
+}
+.hero--primary { background: linear-gradient(135deg, #112747 0%, #1a3a6b 55%, #2a4f8c 100%); color: #fff; }
+.hero--primary .hero__subtitle { color: #c9d6ec; }
+.feature-card { padding: 1.2rem; border: 1px solid var(--ifm-color-emphasis-200); border-radius: 12px; height: 100%; }
+.stat-grid { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin: 2rem 0; }
+.stat-box { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25); border-radius: 12px; padding: .9rem 1.6rem; text-align: center; }
+.stat-num { font-size: 1.9rem; font-weight: 700; }
+.stat-label { font-size: .85rem; opacity: .85; }
