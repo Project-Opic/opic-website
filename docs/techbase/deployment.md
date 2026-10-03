@@ -69,7 +69,23 @@ compose 栈（opic-net 网络）
 
 以上隔离边界可在管理控制台「系统工具 → 隔离信息」页实时查看。
 
-## 6. 常见部署故障
+## 6. 离线安装介质包（社区/DEMO）
+
+无外网环境一键搭建完整演示栈（step1 基础设施 + 技术底座，Traefik 网关形态）：
+
+```bash
+# 源机器制作介质（docker save 全部镜像 + 编排/脚本,约 650MB）
+cd opic-deploy/offline-kit && bash pack.sh v3.2.0
+
+# 目标机安装（离线,Linux+Docker,一条命令）
+tar xzf opic-offline-kit-v3.2.0.tar.gz && cd kit
+bash install.sh               # core:本地登录完整演示
+bash install.sh --with-sso    # 附带 Casdoor/ZITADEL
+```
+
+入口 `http://<目标机IP>:28081`，账号 admin/admin123。详见 opic-deploy 仓 `offline-kit/README.md`。
+
+## 7. 常见部署故障
 
 | 现象 | 处置 |
 |---|---|
