@@ -1,0 +1,2 @@
+{{- .Store.Set "tdOutputFormat" "rss" -}}
+{{- partial "content/rss.html" . -}}

@@ -1,0 +1,44 @@
+{{- $page := .page -}}{{- $ok := true -}}{{- $section := .data -}}{{- $id := .id -}}
+{{- $keys := $section.keys | default (slice) -}}{{- with $section.key }}{{ $keys = $keys | append . }}{{ end -}}
+{{- if or (not (reflect.IsSlice $keys)) (not $keys) }}{{ warnf "%s: landing download requires key or keys; skipping the section" $page.Path }}{{ $ok = false }}{{ end -}}
+{{- $seen := slice -}}{{- range $keys }}{{ $key := strings.TrimSpace (printf "%v" .) }}{{ if not $key }}{{ warnf "%s: landing download keys must not be empty; skipping it" $page.Path }}{{ continue }}{{ end }}{{ if in $seen $key }}{{ warnf "%s: landing download has duplicate key %q; skipping the repeat" $page.Path $key }}{{ continue }}{{ end }}{{ $seen = $seen | append $key }}{{ end -}}
+{{- $format := lower ($page.Store.Get "tdOutputFormat" | default "html") -}}
+{{- if $ok -}}
+<section id="{{ $id }}" class="td-landing-section td-landing-download-section{{ with $section.class }} {{ . }}{{ end }}"{{ with $section.title }} aria-labelledby="{{ $id }}-title"{{ end }}>
+  <div class="td-site-container">
+    {{- partial "landing/heading.html" (dict "page" $page "data" $section "id" $id) }}
+    {{- range $productIndex, $key := $seen }}
+      {{- $position := printf "%s: landing download %s" $page.Path $key -}}
+      {{- $data := partial "download/resolve.html" (dict "page" $page "key" $key "position" $position) -}}
+      {{- if $data.channels }}
+      {{- $owner := printf "%s-%d" $id $productIndex -}}
+    <article class="td-landing-download-product" data-td-download-key="{{ $key }}">
+      {{- if gt (len $seen) 1 }}<h3>{{ $key }}</h3>{{ end }}
+      {{- if eq $format "html" }}
+      <div class="td-landing-download-tabs" data-td-download-tabs>
+        <div class="nav nav-tabs" role="tablist" aria-label="{{ if gt (len $seen) 1 }}{{ $key }}{{ else }}{{ $section.title | default $key }}{{ end }}" hidden>
+          {{- range $data.channels }}
+          {{- $disabled := and (not $data.published) (eq .kind "pinned") }}
+          <button class="nav-link{{ if $disabled }} disabled{{ end }}" id="{{ $owner }}-{{ .id }}-tab" type="button" role="tab" aria-controls="{{ $owner }}-{{ .id }}" aria-selected="false"{{ if $disabled }} disabled{{ end }}>
+            {{- with .icon }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}{{ .title -}}
+          </button>
+          {{- end }}
+        </div>
+        <div class="tab-content">
+          {{- range $data.channels }}
+          <section class="tab-pane" id="{{ $owner }}-{{ .id }}">
+            {{ if gt (len $seen) 1 }}<h4>{{ .title }}</h4>{{ else }}<h3>{{ .title }}</h3>{{ end }}
+            {{ partial "download/channel.html" (dict "page" $page "data" $data "channel" . "format" $format "owner" $owner) }}
+          </section>
+          {{- end }}
+        </div>
+      </div>
+      {{- else if eq $format "print" }}
+        {{- range $data.channels }}<section class="td-landing-download-print"><h4>{{ .title }}</h4>{{ partial "download/channel.html" (dict "page" $page "data" $data "channel" . "format" $format "owner" $owner) }}</section>{{ end -}}
+      {{- end }}
+    </article>
+      {{- end }}
+    {{- end }}
+  </div>
+</section>
+{{- end -}}

@@ -1,0 +1,51 @@
+{{- $p := .page -}}
+{{- $headingLevel := .headingLevel | default 2 -}}
+{{- $linkImage := true -}}
+{{- if isset . "linkImage" }}{{ $linkImage = .linkImage }}{{ end -}}
+{{- $manualLink := partial "content/manual-link.html" $p -}}
+{{- $isExternal := not (not (findRE "^https?://" $manualLink)) -}}
+<li class="td-blog-posts-list__item">
+  <div class="td-blog-posts-list__body">
+    {{- if eq $headingLevel 3 }}
+    <h3 class="h5 mt-0 mb-1"><a href="{{ $manualLink }}"{{ if $isExternal }} target="_blank" rel="noopener"{{ end }}>{{ $p.Title }}</a>{{ if $isExternal }} <i class="fa-solid fa-arrow-up-right-from-square fa-xs text-muted" aria-hidden="true"></i>{{ end }}</h3>
+    {{- else }}
+    <h2 class="h5 mt-0 mb-1">
+      <a href="{{ $manualLink }}"{{ if $isExternal }} target="_blank" rel="noopener"{{ end }}>{{ $p.Title }}</a>
+      {{ if $isExternal }}<i class="fa-solid fa-arrow-up-right-from-square fa-xs text-muted" aria-hidden="true"></i>{{ end }}
+    </h2>
+    {{- end }}
+    {{ partial "shell/blog-meta.html" (dict "page" $p "terms" true) }}
+    {{- $featuredImage := partial "featured-image-src.html" $p -}}
+    {{- $summary := "" -}}
+    {{- if $isExternal -}}
+      {{- $summary = $p.Description | default $p.RawSummary | plainify | htmlUnescape -}}
+    {{- else -}}
+      {{- $summary = $p.Plain | htmlUnescape | truncate 250 -}}
+    {{- end -}}
+    <div class="td-blog-posts-list__summary-row d-none d-md-flex align-items-start gap-3 mt-1{{ if $featuredImage }} td-blog-posts-list__summary-row--with-image{{ end }}">
+      {{- if $linkImage -}}
+        {{- with $featuredImage }}
+        {{- /* A row shows its picture at 250x125, so ship that frame at twice
+             the density instead of the original, and let the browser skip it
+             while the row is off screen or, on a phone, not displayed at all.
+             What Hugo cannot process, and a picture already no larger than
+             the frame, keeps its own URL. */ -}}
+        {{- $thumbnail := . -}}
+        {{- $media := (partialCached "featured-image-resolve.html" $p $p.Site.BaseURL $p.Language.Lang $p.RelPermalink).media -}}
+        {{- if and $media.processable (or (gt $media.width 500) (gt $media.height 250)) -}}
+          {{- $thumbnail = ($media.resource.Fill "500x250").RelPermalink -}}
+        {{- end }}
+      <figure class="td-blog-posts-list__thumbnail flex-shrink-0 mb-0" style="width: 250px">
+        <a href="{{ $manualLink }}"{{ if $isExternal }} target="_blank" rel="noopener"{{ end }}>
+          <img src="{{ $thumbnail }}" alt="{{ $p.Title }}" width="250" height="125" style="object-fit: cover;" loading="lazy" decoding="async">
+        </a>
+      </figure>
+        {{- end }}
+      {{- else -}}
+        {{- partial "featured-image.html" (dict "p" $p "w" 250 "h" 125 "class" "td-blog-posts-list__thumbnail flex-shrink-0 mb-0") -}}
+      {{- end }}
+      <div class="td-blog-posts-list__summary flex-grow-1"><p class="pt-0 mt-0 mb-0">{{ $summary }}</p></div>
+    </div>
+    <div class="td-blog-posts-list__summary-mobile d-md-none"><p class="pt-0 mt-0 mb-0">{{ $summary }}</p></div>
+  </div>
+</li>

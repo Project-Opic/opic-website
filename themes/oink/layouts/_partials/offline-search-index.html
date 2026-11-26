@@ -1,0 +1,4 @@
+{{- /* The URL of this language's local-search index. A large index is split;
+     search/index-resources.html owns both files. */ -}}
+{{- $search := partialCached "search/index-resources.html" . .Site.BaseURL .Site.Language.Lang -}}
+{{- return $search.index.RelPermalink -}}

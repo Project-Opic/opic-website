@@ -1,0 +1,54 @@
+# OPIC 开放智能算力平台官网 —— Hugo + OINK 主题
+# 迁移自 Docusaurus 3（2026-11-26）。配置基准：oink/tests/site/hugo.yaml
+baseURL: https://opic.example.com/
+title: OPIC 开放智能算力平台
+theme: oink
+defaultContentLanguage: zh
+enableRobotsTXT: true
+disableKinds: [sitemap]
+
+taxonomies:
+  tag: tags
+  category: categories
+  author: authors
+
+# OINK 必需的 Goldmark 配置
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+    parser:
+      wrapStandAloneImageWithinParagraph: false
+      attribute:
+        block: true
+    extensions:
+      passthrough:
+        enable: true
+        delimiters:
+          block: [['\[', '\]'], ['$$', '$$']]
+          inline: [['\(', '\)']]
+
+# OINK 官方输出集（避免触发 i18n 解析兼容问题）
+outputs:
+  home: [HTML, LLMS, NAVJSON]
+  section: [HTML, print, RSS, markdown]
+  page: [HTML, markdown]
+
+module:
+  hugoVersion:
+    min: "0.169.0"
+
+params:
+  name: OPIC
+  description: 本体论驱动的智算与 MaaS 一体化平台 · 23 个能力域 · 需求基线机器可校验
+  github_repo: https://github.com/Project-Opic/opic-website
+  github_subdir: ""
+  github_project_repo: https://github.com/Project-Opic/opic-website
+  copyright:
+    authors: '[OPIC 开放智能算力平台](https://opic.example.com)'
+    from_year: 2026
+  offline_search: true
+  offline_search_index: summary
+  offline_search_summary_length: 80
+  offline_search_max_results: 10
+  markmap: true

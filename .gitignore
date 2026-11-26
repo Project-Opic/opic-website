@@ -1,5 +1,4 @@
-node_modules/
-build/
-.docusaurus/
+public/
+hugo.lock
 .DS_Store
-*.log
+resources/

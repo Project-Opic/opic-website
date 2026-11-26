@@ -1,0 +1,97 @@
+# OPIC 官网首页 —— 数据即页面（oink landing）
+sections:
+  - hero
+  - metrics
+  - capabilities
+  - cards
+  - cta
+
+hero:
+  eyebrow: 本体论驱动的智算与 MaaS 一体化平台
+  title_lines:
+    - OPIC 开放智能算力平台
+    - 需求基线 · 机器可校验
+  desc: 23 个能力域构成完整语义层，覆盖从物理算力入网到 AI 应用消费的全链路。需求既是产品也是验证对象。
+  actions:
+    - label: 阅览文档
+      url: docs/
+      icon: fa-solid fa-book-open
+      style: primary
+    - label: 查看路线图
+      url: docs/roadmap/
+      icon: fa-solid fa-road
+      style: ghost
+
+metrics:
+  eyebrow: 三个数字
+  title: 基线以可审计的方式冻结
+  desc: 每个数字都能在需求基线与文档中追溯。
+  columns: 3
+  items:
+    - value: 23
+      label: 能力域
+      desc: 覆盖智算入网到 AI 消费全链路
+      icon: fa-solid fa-cubes
+    - value: 927
+      label: 项自动审核
+      desc: 需求规格说明书与编制说明的双闸校验
+      icon: fa-solid fa-check-double
+    - value: "v3.2"
+      label: 基线版本
+      desc: SHA-256 清单冻结，一致性扫描零断链
+      icon: fa-solid fa-lock
+
+capabilities:
+  eyebrow: 三层架构
+  title: 用户 · 平台 · AI 应用
+  desc: 共用一套身份与授权语义，本体驱动。
+  items:
+    - ref: 01 / 用户层
+      title: 运营方 · 租户 · 开发者
+      motto: 一套身份语义贯穿始终
+      bullets:
+        - 平台运营方与租户共用授权模型
+        - 开发者通过 MaaS 消费能力
+        - 终端用户走统一认证
+      value: 访问控制是语义的一部分
+    - ref: 02 / 平台层
+      title: 智算基础设施
+      motto: 算力入网即可校验
+      bullets:
+        - 23 个能力域按本体建模
+        - 部署/运维/FAQ 文档随域发布
+        - 需求基线以 SHA-256 冻结
+      value: 平台能力 = 语义能力
+
+cards:
+  eyebrow: 从这里开始
+  title: 四步了解 OPIC
+  columns: 4
+  items:
+    - name: 平台简介
+      icon: fa-solid fa-circle-info
+      desc: 三个差异化主张
+      url: docs/intro/
+    - name: 总体架构
+      icon: fa-solid fa-diagram-project
+      desc: 三层架构与约束
+      url: docs/architecture/
+    - name: 本体论方法
+      icon: fa-solid fa-layer-group
+      desc: V10.0 需求探索与建模
+      url: docs/ontology-method/
+    - name: 实施路线图
+      icon: fa-solid fa-road
+      desc: 分阶段推进计划
+      url: docs/roadmap/
+
+cta:
+  eyebrow: 一起建设
+  title: 加入 OPIC 开源社区
+  desc: 源码、文档与需求基线全部开放。
+  actions:
+    - label: GitHub 仓库
+      url: https://github.com/Project-Opic
+      icon: fa-brands fa-github
+      style: primary
+      external: true

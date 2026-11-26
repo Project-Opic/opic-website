@@ -1,0 +1,68 @@
+{{- $defaults := dict
+  "docs" "fa-solid fa-book"
+  "doc" "fa-solid fa-book"
+  "guide" "fa-solid fa-book"
+  "blog" "fa-solid fa-blog"
+  "news" "fa-solid fa-blog"
+  "examples" "fa-solid fa-flask"
+  "example" "fa-solid fa-flask"
+  "community" "fa-solid fa-people-group"
+  "about" "fa-solid fa-circle-info"
+  "download" "fa-solid fa-download"
+  "github" "fa-brands fa-github"
+-}}
+{{- $keys := slice -}}
+{{- with .Identifier }}{{ $keys = $keys | append (lower .) }}{{ end -}}
+{{- with .Page }}{{ with .Section }}{{ $keys = $keys | append (lower .) }}{{ end }}{{ end -}}
+{{- $link := .URL -}}
+{{- with .Page }}{{ $link = .RelPermalink }}{{ end -}}
+{{- with $link -}}
+  {{- $path := (urls.Parse .).Path | default "" -}}
+  {{- with site.LanguagePrefix -}}
+    {{- if or (eq $path .) (hasPrefix $path (printf "%s/" .)) -}}
+      {{- $path = strings.TrimPrefix . $path -}}
+    {{- end -}}
+  {{- end -}}
+  {{- with index (split (strings.TrimPrefix "/" $path) "/") 0 -}}
+    {{- $keys = $keys | append (lower .) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $icon := "" -}}
+{{- range $keys -}}
+  {{- if not $icon -}}
+    {{- with index $defaults . }}{{ $icon = . }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $icon }}{{ $icon = "fa-solid fa-link" }}{{ end -}}
+
+{{- $explicit := false -}}
+{{- $explicitValue := "" -}}
+{{- with .Page -}}
+  {{- if isset .Params "icon" -}}
+    {{- $explicit = true -}}
+    {{- $explicitValue = index .Params "icon" -}}
+  {{- end -}}
+{{- end -}}
+{{- with .Params -}}
+  {{- if isset . "icon" -}}
+    {{- $explicit = true -}}
+    {{- $explicitValue = index . "icon" -}}
+  {{- end -}}
+{{- end -}}
+{{- if $explicit -}}
+  {{- $kind := printf "%T" $explicitValue -}}
+  {{- if eq $kind "bool" -}}
+    {{- if not $explicitValue }}{{ $icon = "" }}{{ end -}}
+  {{- else if eq $kind "string" -}}
+    {{- $trimmed := strings.TrimSpace $explicitValue -}}
+    {{- if or (eq $trimmed "") (eq (lower $trimmed) "none") (eq (lower $trimmed) "false") -}}
+      {{- $icon = "" -}}
+    {{- else -}}
+      {{- $icon = $trimmed -}}
+    {{- end -}}
+  {{- else -}}
+    {{- warnidf (printf "validate:menu-icon:%v" $explicitValue) "menu %q params.icon must be a Font Awesome class string or false; got %T; keeping default icon" (.Name | default .Identifier) $explicitValue -}}
+  {{- end -}}
+{{- end -}}
+{{- return $icon -}}
