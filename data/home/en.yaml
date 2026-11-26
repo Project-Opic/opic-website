@@ -1,0 +1,88 @@
+sections:
+  - hero
+  - metrics
+  - capabilities
+  - cards
+  - cta
+
+hero:
+  eyebrow: Ontology-driven intelligent computing & MaaS platform
+  title_lines:
+    - OPIC Open Intelligent
+    - Computing Platform
+  desc: 23 capability domains form a complete semantic layer, covering everything from physical compute onboarding to AI application consumption.
+  actions:
+    - label: Read the docs
+      url: en/docs/
+      icon: fa-solid fa-book-open
+      style: primary
+    - label: Roadmap
+      url: en/docs/roadmap/
+      icon: fa-solid fa-road
+      style: ghost
+
+metrics:
+  eyebrow: Three numbers
+  title: Baseline frozen in an auditable way
+  desc: Every number is traceable in the requirements baseline and docs.
+  columns: 3
+  items:
+    - value: 23
+      label: Capability domains
+      desc: From compute onboarding to AI consumption
+      icon: fa-solid fa-cubes
+    - value: 927
+      label: Automated checks
+      desc: Dual-gate validation of requirements specs
+      icon: fa-solid fa-check-double
+    - value: "v3.2"
+      label: Baseline version
+      desc: SHA-256 frozen, zero broken cross-domain links
+      icon: fa-solid fa-lock
+
+capabilities:
+  eyebrow: Three-layer architecture
+  title: Users · Platform · AI Applications
+  desc: One identity & authorization semantics across the stack.
+  items:
+    - ref: 01 / User layer
+      title: Operators · tenants · developers
+      motto: One identity semantics throughout
+      bullets:
+        - Shared authorization model for platform & tenants
+        - Developers consume capabilities via MaaS
+        - End users go through unified authN
+      value: Access control is part of the semantics
+
+cards:
+  eyebrow: Get started
+  title: Understand OPIC in four steps
+  columns: 4
+  items:
+    - name: Platform intro
+      icon: fa-solid fa-circle-info
+      desc: Three differentiators
+      url: en/docs/intro/
+    - name: Architecture
+      icon: fa-solid fa-diagram-project
+      desc: Three layers & constraints
+      url: en/docs/architecture/
+    - name: Ontology method
+      icon: fa-solid fa-layer-group
+      desc: V10.0 requirements modeling
+      url: en/docs/ontology-method/
+    - name: Roadmap
+      icon: fa-solid fa-road
+      desc: Phased rollout plan
+      url: en/docs/roadmap/
+
+cta:
+  eyebrow: Join us
+  title: Contribute to OPIC
+  desc: Source, docs and requirements baseline are all open.
+  actions:
+    - label: GitHub org
+      url: https://github.com/Project-Opic
+      icon: fa-brands fa-github
+      style: primary
+      external: true

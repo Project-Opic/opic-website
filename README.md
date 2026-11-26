@@ -35,6 +35,13 @@ hugo               # 输出到 public/
 deploy.sh          # 构建 + 统计
 ```
 
+## 多语言 (zh / en)
+
+- 中文（默认）：`content/docs/**`；英文：`content/en/docs/**`
+- 语言切换由 OINK 自动完成（`hreflang` alternate + 导航切换器），仅展示**已翻译**的页面
+- 首页数据：`data/home/zh.yaml` 与 `data/home/en.yaml` 各管一版
+- 已译核心页：intro / architecture / ontology-method / roadmap（en 侧其余页面持续补齐）
+
 ## 内容维护
 
 - 文档放在 `content/docs/**`，用 `weight` 控制顺序（迁移自 Docusaurus 的 `sidebar_position`）。

@@ -1,0 +1,12 @@
+[Unit]
+Description=Rebuild and publish OPIC website from git
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Environment=SITE_ROOT=/srv/opic-website
+WorkingDirectory=/srv/opic-website
+ExecStart=/bin/sh -c 'cd /srv/opic-website && git pull --ff-only --quiet && /srv/opic-website/deploy/build-publish.sh'
+NoNewPrivileges=true
