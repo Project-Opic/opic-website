@@ -1,6 +1,6 @@
 # OPIC 开放智能算力平台官网 —— Hugo + OINK 主题
 # 迁移自 Docusaurus 3（2026-11-26）。配置基准：oink/tests/site/hugo.yaml
-baseURL: https://opic.example.com/
+baseURL: https://project-opic.github.io/opic-website/
 title: OPIC 开放智能算力平台
 theme: oink
 defaultContentLanguage: zh
@@ -95,7 +95,7 @@ params:
   github_subdir: ""
   github_project_repo: https://github.com/Project-Opic/opic-website
   copyright:
-    authors: '[OPIC 开放智能算力平台](https://opic.example.com)'
+    authors: '[OPIC 开放智能算力平台](https://project-opic.github.io/opic-website/)'
     from_year: 2026
   offline_search: true
   offline_search_index: summary
