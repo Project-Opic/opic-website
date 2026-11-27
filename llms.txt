@@ -1,0 +1,40 @@
+# OPIC 开放智能算力平台
+
+> 本体论驱动的智算与 MaaS 一体化平台 · 23 个能力域 · 需求基线机器可校验
+
+## Site index
+
+- [Home page](https://project-opic.github.io/opic-website/)
+- [navigation.json](https://project-opic.github.io/opic-website/navigation.json)
+- [文档](https://project-opic.github.io/opic-website/docs/index.md): OPIC 开放智能算力平台 · 本体论驱动的智算 + MaaS 一体化平台
+- [动态](https://project-opic.github.io/opic-website/blog/index.md)
+
+## Documentation index
+
+- [部署](https://project-opic.github.io/opic-website/docs/deploy/index.md): OPIC 基础设施部署方案与运维手册
+  - [第一步·基础设施容器化部署](https://project-opic.github.io/opic-website/docs/deploy/step1-containerized/index.md)
+  - [第一步·基础设施运维手册](https://project-opic.github.io/opic-website/docs/deploy/step1-ops-manual/index.md)
+  - [OPIC 基础设施生产部署方案](https://project-opic.github.io/opic-website/docs/deploy/prod-deployment-plan/index.md)
+- [平台简介](https://project-opic.github.io/opic-website/docs/intro/index.md)
+- [总体架构](https://project-opic.github.io/opic-website/docs/architecture/index.md)
+- [23 个能力域](https://project-opic.github.io/opic-website/docs/domains/index.md)
+- [本体论工程方法](https://project-opic.github.io/opic-website/docs/ontology-method/index.md)
+- [安全与合规](https://project-opic.github.io/opic-website/docs/security/index.md)
+- [计量与运营方法论](https://project-opic.github.io/opic-website/docs/cost/index.md)
+- [业界对标](https://project-opic.github.io/opic-website/docs/benchmark/index.md)
+- [技术选型评估](https://project-opic.github.io/opic-website/docs/tech-selection/index.md)
+- [实施路线图](https://project-opic.github.io/opic-website/docs/roadmap/index.md)
+- [技术底座 · 新人培训入门](https://project-opic.github.io/opic-website/docs/techbase/onboarding/index.md): 环境准备/本地启动/代码结构/开发流程——新人一天上手
+- [技术底座 · 编译与部署](https://project-opic.github.io/opic-website/docs/techbase/deployment/index.md): 构建矩阵/生产部署/迁移回滚/多中心 fork checklist
+- [技术底座 · 运维手册](https://project-opic.github.io/opic-website/docs/techbase/operations/index.md): 健康检查/监控告警/日志体系/数据面/备份/凭据/故障速查
+- [技术底座 · FAQ 实战踩坑](https://project-opic.github.io/opic-website/docs/techbase/faq/index.md): SSO/SQL/部署/前端/AI 助理 18 条真实排障记录
+- [技术底座 · 离线安装介质包](https://project-opic.github.io/opic-website/docs/techbase/offline-kit/index.md): step1 基础设施 + opic-techbase 离线一键部署——社区运营/拓展用户/DEMO 演示环境搭建（Traefik 网关形态,约 650MB 介质,10 分钟拉起）
+
+## Full-text bundles
+
+- [文档](https://project-opic.github.io/opic-website/docs/llms-full.txt)
+
+## Site locales
+
+- [简体中文](https://project-opic.github.io/opic-website/)
+- [English](https://project-opic.github.io/opic-website/en/)

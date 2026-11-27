@@ -1,0 +1,1432 @@
+================
+Source: https://project-opic.github.io/opic-website/docs/index.md
+================
+
+# OPIC 文档
+
+> OPIC 开放智能算力平台 · 本体论驱动的智算 + MaaS 一体化平台
+
+---
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+# OPIC 文档
+
+OPIC 是一套以本体论（Ontology）驱动的智算 + MaaS 一体化平台：
+23 个能力域构成完整的语义层，覆盖从物理算力入网到 AI 应用消费的全链路。
+
+- **[平台简介](intro/)** — 三个差异化主张与需求工程闸门
+- **[总体架构](architecture/)** — 三层架构与关键约束
+- **[23 个能力域](domains/)** — 能力域清单
+- **[本体论工程方法](ontology-method/)** — V10.0 需求探索与建模
+- **[部署与运维](techbase/)** — 编译部署、运维、FAQ、新人入门
+
+---
+
+本节页面：
+
+- [平台简介](/opic-website/docs/intro/)
+- [总体架构](/opic-website/docs/architecture/)
+- [23 个能力域](/opic-website/docs/domains/)
+- [本体论工程方法](/opic-website/docs/ontology-method/)
+- [安全与合规](/opic-website/docs/security/)
+- [计量与运营方法论](/opic-website/docs/cost/)
+- [业界对标](/opic-website/docs/benchmark/)
+- [技术选型评估](/opic-website/docs/tech-selection/)
+- [实施路线图](/opic-website/docs/roadmap/)
+- [部署](/opic-website/docs/deploy/): OPIC 基础设施部署方案与运维手册
+- [技术底座 · 新人培训入门](/opic-website/docs/techbase/onboarding/): 环境准备/本地启动/代码结构/开发流程——新人一天上手
+- [技术底座 · 编译与部署](/opic-website/docs/techbase/deployment/): 构建矩阵/生产部署/迁移回滚/多中心 fork checklist
+- [技术底座 · 运维手册](/opic-website/docs/techbase/operations/): 健康检查/监控告警/日志体系/数据面/备份/凭据/故障速查
+- [技术底座 · FAQ 实战踩坑](/opic-website/docs/techbase/faq/): SSO/SQL/部署/前端/AI 助理 18 条真实排障记录
+- [技术底座 · 离线安装介质包](/opic-website/docs/techbase/offline-kit/): step1 基础设施 + opic-techbase 离线一键部署——社区运营/拓展用户/DEMO 演示环境搭建（Traefik 网关形态,约 650MB 介质,10 分钟拉起）
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/intro/index.md
+================
+
+# 平台简介
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+# OPIC 开放智能算力平台
+
+OPIC 是一套**以本体论（Ontology）驱动**的智算 + MaaS 一体化平台：23 个能力域构成完整的语义层，覆盖从物理算力入网到 AI 应用消费的全链路。
+
+## 三个差异化主张
+
+1. **本体论驱动的需求工程**——需求是机器可校验的语义体系：每域一份《需求规格说明书》与《编制说明》，受 927 项自动审核、一致性扫描（130 条跨域引用零断链）、第九部分 13 项自检三道闸门约束，需求基线以 SHA-256 清单冻结。
+2. **第 3 层可整体替换**——全部开源依赖被隔离在依赖层，替换引擎不触发需求变更；替换暴露语义缺口才走需求变更。
+3. **业界对标 20 条必备全部达标**（2026-09 刷新口径，含 Batch 推理、结构化输出、护栏独立 API、缓存计价分列、模型退役承诺）。
+
+## 规模快照（需求基线 v3.2 定稿）
+
+| 指标 | 数值 |
+|---|---|
+| 能力域 | 23 |
+| 正文 / 编制说明 | 47,628 行 / 9,421 行 |
+| 机器校验 | 927 项 · FAIL 0 / WARN 0 |
+| 跨域引用 | 130 条 · 断链 0 |
+| 四轮评审发现 | 88 条 · 核销 86 / 登记 2 |
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/architecture/index.md
+================
+
+# 总体架构
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+# 总体架构
+
+## 三层架构
+
+| 层 | 内容 | 关键约束 |
+|---|---|---|
+| 第 1 层 · 用户层 | 平台运营方 / 租户 / 开发者 / 终端用户 | 共用同一套身份与授权语义 |
+| 第 2 层 · 能力层（本体论域层） | 23 个域 + 统一底座 | 唯一语义权威；域间契约双向闭合 |
+| 第 3 层 · 开源依赖层 | K8s/DRA、Kueue/Volcano、vLLM/SGLang、ZITADEL/Casdoor、Pigsty、Temporal、NATS 等 | 可整体替换；替换不溯本体 |
+
+## MCC：多独立能力中心
+
+- 每个能力中心**独立编译、独立部署、独立演进**；
+- 中心间只走 **HTTP API + 事件总线**，**禁止共享业务数据库表**（`opicdb` 按 schema 前缀隔离，禁 AutoMigrate）；
+- **Tier 2 → Tier 1 禁止调用**；
+- 认证：运维侧 OIDC、租户侧 Casdoor；授权「Casbin RBAC 优先 → 拒绝则查 IdP → 任一通过即允许」；审计头 `X-Trace-Id` / `X-User-Id` 全链透传。
+
+## 八条功能链
+
+| 链 | 域 |
+|---|---|
+| ① 信任与底座 | SEC · SYS · ARC · CRT · DBS |
+| ② 物理资源 | AST · VPN · OSC · CLC · ADD · CSC |
+| ③ 制品与应用交付 | REG · IGN · PIP · APP |
+| ④ 流量与消费 | APF · OPR |
+| ⑤ 观测 | MON |
+| ⑥ 租户 | USR |
+| ⑦ 数据与智能资产 | DAT · MDL · KNB → APP |
+| ⑧ 合规治理（横切） | CMP |
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/domains/index.md
+================
+
+# 23 个能力域
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+# 23 个能力域
+
+| 域码 | 域名 | 一句话定位 |
+|---|---|---|
+| O-SEC | 零信任安全中心 | 统一主体身份、会话、信任关系与授权决策 |
+| O-ARC | 架构元数据域 | 错误码/元数据注册与 SDK 分发；全平台唯一真联动域 |
+| O-SYS | 平台底座域 | 能力注册发现、RBAC、配置、审计、事件总线、网关 |
+| O-DBS | 数据服务域 | 共享库实例供给、连接凭据、备份与高可用 |
+| O-CRT | 证书信任域 | CA 树与证书全生命周期；凭据谱系第 1 位置 |
+| O-VPN | 网络连通域 | 覆盖网络、节点入网、路由连通；双平面分离 |
+| O-REG | 制品仓库域 | 制品/镜像仓库、凭据、缓存策略；托管 ≠ 编目 |
+| O-AST | 资产域 | 节点资产台账、接入装配、巡检漂移；能力标签权威 |
+| O-IGN | 交付执行域 | 蓝本版本目录、执行机调度、任务桥接 |
+| O-CLC | 集群域 | K8s 集群与节点编排；唯一快照回滚 |
+| O-OSC | 节点使能域 | OS 层算力使能包；借道式执行零凭据 |
+| O-ADD | 集群扩展域 | 扩展组件目录、依赖解析、批量分发 |
+| O-USR | 租户门户域 | 租户/成员/门户；镜子域零业务写入 |
+| O-PIP | 流水线域 | 源码到制品；一次性 Job |
+| O-APP | 应用域 | AI 应用生命周期（推理/智能体/训练/llm_app 四 kind） |
+| O-CSC | 算力调度域 | 算力语义层；占用是台账事实不是对象状态 |
+| O-APF | 接口与令牌域 | 路由、令牌、限流、计量；OpenAI 兼容契约 |
+| O-MON | 可观测域 | 指标/日志/看板/通知；观测 ≠ 存储 |
+| O-OPR | 运营成本域 | 成本采集、定价分摊、出账；账本只进不出 |
+| O-DAT | 数据资产域 | 数据集版本、血缘、预处理标注；不经手字节 |
+| O-MDL | 模型域 | 模型/评估账本/就绪判定/退役承诺 |
+| O-KNB | 知识库域 | 知识库与检索治理；治理 ≠ 检索 |
+| O-CMP | 内容合规域 | 审核判定链、生成内容标识、备案、前置闸门 |
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/ontology-method/index.md
+================
+
+# 本体论工程方法
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+# 本体论工程方法（核心差异化）
+
+OPIC 与传统「需求文档 + 开发」的根本差异：**需求本身是一套可计算、可校验、可冻结的语义体系**。
+
+## 九条横切判据
+
+① 真相位置显式化 ② 写路径收敛（跨对象联动 = 0）③ 凭据谱系八位置 ④ 账本只增不改 ⑤ 审批判据家族（不可逆失效型 / 边界扩张型，无审批必有替代机制）⑥ 执行范式五语境 ⑦ 无副作用执行家族 ⑧ 重算代价判据 ⑨ 阻断在消费方。
+
+## 四道机器闸门
+
+| 闸门 | 校验 | 结果 |
+|---|---|---|
+| 独立审核（927 项） | 结构完整性、编号连续性、计数对账、审批口径 | FAIL 0 / WARN 0 |
+| 一致性扫描 | 跨域引用、契约对称、时点残留、泄漏检查 | 断链 0 / 不对称 0 |
+| 第九部分自检 | UI 定义域、载体、原型（md↔html） | 23 域全 PASS |
+| 知识图谱 | 23 节点 / 61 边关系可视化 | 与基线同步 |
+
+## 版本冻结与变更单
+
+版本链 v1.1 → v2.0 → v3.0 → v3.1 → **v3.2 定稿**（2026-09-28）。冻结 = 23 域 × 交付件 SHA-256 清单；冻结后任何修改必须走变更单（登记 → 执行 → 闸门重跑 → 新版基线）。四轮全域评审 88 条发现全链闭环。
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/security/index.md
+================
+
+# 安全与合规
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+# 安全与合规
+
+## 凭据谱系八位置
+
+平台内每一类凭据在谱系上有唯一位置与暴露上界：证书可导出（O-CRT）、集群 SSH 零持久化（O-CLC）、OS 使能零凭据借道（O-OSC）、镜像令牌只在内存流转、AI 令牌一次显示（O-APF）、共享库凭据（O-DBS）等。审计账本只增不改；安全事件与调用审计两流不合并（粒度、保留策略、消费者不同）。
+
+## 内容合规（法定义务）
+
+生成内容**标识三要素**（属性信息 / 提供者编码 / 内容编号）对标 GB 45438-2025（2025-09-01 施行）；备案状态机对接外部监管；**上线前置闸门**把合规从「事后审计」变成「发布阻断」；护栏档（GuardrailProfile）让同一策略按 ID 复用于任意接入点，未挂载接入点使用显式默认档。
+
+## 零信任与机密计算
+
+授权判定：Casbin RBAC 优先 → 拒绝则查 IdP → 任一通过即允许；判定与执行分离，阻断在消费方。机密计算部署档 + 节点 TEE 能力回源 + attestation 归第 3 层 + HYOK 密钥权威在租户侧。
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/cost/index.md
+================
+
+# 计量与运营方法论
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+# 计量与运营方法论
+
+**判据：「事实与原语在本域，方法与参数在外部」**——平台输出「多少钱、花在哪、谁承担、用得如何」四类事实；方法论在其上自由定义。
+
+## 计量事实（平台承载）
+
+成本记录按六维聚合维度记账；分摊规则原语（ratio 类型 + 比例归一强校验，未命中显式落 `unallocated` 黑洞不隐藏）；**账单可复现**（任一账单可从计量事实重放）；多轴计价：路径轴（online / batch / cached）× 承诺轴（standard / priority / reserved / spot），被抢占时段计价豁免；缓存 tokens 分列 + 让利显式；SLA 补偿凭证入账（与违约判定、SLO 定义三方闭环）。
+
+## TCO 五要素归集（六维 → 五要素）
+
+| TCO 要素 | 归集来源 | 口径 |
+|---|---|---|
+| ① 算力 | 计算资源维度 | 按分配台账占用事实折算 |
+| ② 存储 | 存储维度 | 按存储实例利用率 |
+| ③ 网络 | 网络维度 | 参数面 + 业务面流量 |
+| ④ 运维 | 人力与工单维度 | 外部工单系统按中心归集 |
+| ⑤ 电力与机房 | 能耗维度 | 机房计量事实 |
+
+## 60:40 双权重分摊（配置法）
+
+在分摊规则原语上配置两条 ratio 规则即可表达（如业务线 60% 按用量 / 部门 40% 按配额）；权重调整有审计、不追溯已封账账单。
+
+## ROI 6:4 测算模板（外部计算）
+
+```
+ROI(周期) = (业务收益归集值 × 6) / (平台 TCO 归集值 × 4)
+业务收益归集值 = Σ(挂靠应用调用量 × 单位收益系数)     ← 取数：成本账单（按应用维度）
+平台 TCO 归集值  = 五要素合计                          ← 取数：成本账单 / 利用率报告
+```
+
+决策阈值建议：ROI ≥ 1.5 扩容线、1.0~1.5 维持线、< 1.0 专项复盘线。平台「建议零执行」——所有建议由人确认。
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/benchmark/index.md
+================
+
+# 业界对标
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+# 业界对标（2026-09 刷新口径）
+
+**20 条「缺则不合格」必备能力：达标 20/20。** 15 条经典必备（多租户与配额、Token 计量与缓存分列、流式与函数调用声明、gang 调度、算力切分语义、内容标识、模型退役承诺、SLA 治理、A/B 与数据飞轮、RAG 引用溯源等）+ 2025H2 新必备 5 项（Batch API、Prompt caching 计价、结构化输出/约束解码、护栏独立 API、模型退役公开承诺）。
+
+## 已领先业界的点
+
+- 判定/执行分离且阻断在消费方
+- 账本只增不改 + 计价时点固化 + 缓存分列诚实口径
+- MCP 安全边界（默认拒绝 + 审批前置——多数平台「只接不管」）
+- 本体化需求工程（机器可校验的需求基线在业界罕见）
+
+## 2026 风向兼容性
+
+Agent 双协议（MCP 入 LF + A2A）｜计价多轴化｜推理架构换代（PD 分离 / KV 感知路由契约位已预留）｜K8s 底座定型（DRA GA / Kueue 默认化——直接吸收）。
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/tech-selection/index.md
+================
+
+# 技术选型评估
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+# 技术选型评估：Temporal 与 NATS
+
+**结论：不新建能力中心；NATS 单归属平台底座域（O-SYS），Temporal 双归属应用域（业务语义）+ 平台底座域（底座接入）。**
+
+- **NATS** = 事件总线的第 3 层可替换实现（Core NATS 发布订阅 / JetStream 持久化）；各中心只依赖事件契约（subject 命名、审计头透传、统一信封），不得直绑 NATS API。
+- **Temporal** = 持久工作流执行引擎。工作流业务语义已在应用域（`WorkflowDefinition`，执行明细显式「不落本域」——Temporal 恰是该声明的域外承载）；引擎平台接入语义（集群编目、namespace / task-queue 治理、跨中心访问、审计）归平台底座域。每中心一个 task queue、各自 Worker，跨中心编排走网关/事件。
+- **不新建中心的判据**：新域门槛是「新的业务事实领地」；引擎可整体替换是第 3 层纪律。
+- **首批落点**：联邦部署编排、批量推理作业完成窗口、智能体会话恢复、交付任务桥接补偿（Temporal）；事件总线实现、告警投递、变更通知（NATS）。
+- **工程落地**：部署与适配代码归 platform-base-center；Worker SDK 集成归 application-center；技术底座脚手架新增消息与工作流封装模块。
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/roadmap/index.md
+================
+
+# 实施路线图
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+# 实施路线图
+
+## 当前状态（2026-09-28）
+
+需求基线 v3.2 定稿冻结；23 个能力域材料已分发至 23 个能力中心仓库（18 既有 + 5 新建）；技术底座正本 `opic-techbase` 就位；官网首发。
+
+## 建模阶段（下一步）
+
+入口要求：`domain_rules.py`（零审批域硬阻断）、技术主键、`域.对象` 字符串承载、三变体适配层、反向接口清单、30 落点计数同步全量清单、单边声明白名单、协议承诺 ↔ 语义承载对账；执行纪律四条（定义先于引用 / 每域自跑 audit / 修复 H 区留痕 / 跨域引用带前缀）。
+
+## 后续窗口
+
+- **v3.3 变更单**：引入 Temporal（持久工作流）与 NATS（消息通道）——总纲映射 +2 行、底座域扩列、应用域 1.6.4 映射、可观测消费声明。
+- **Phase 3 候选池**：评测集市场与回归服务、Agent runtime 四件套深化、跨云算力调度预留。
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/deploy/index.md
+================
+
+# 部署
+
+> OPIC 基础设施部署方案与运维手册
+
+---
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+本节页面：
+
+- [第一步·基础设施容器化部署](/opic-website/docs/deploy/step1-containerized/)
+- [第一步·基础设施运维手册](/opic-website/docs/deploy/step1-ops-manual/)
+- [OPIC 基础设施生产部署方案](/opic-website/docs/deploy/prod-deployment-plan/)
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/deploy/step1-containerized/index.md
+================
+
+# 第一步·基础设施容器化部署
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+# 第一步·基础设施容器化部署
+
+> 本文是 [opic-deploy](https://gitcode.com/opic-ontology/opic-deploy) 工程 `docs/第一步-容器化部署.md` 的官网镜像（事实源在该仓）；
+> 规划依据：《116-规划-opic-deploy第一步-基础设施安装》。运维操作见《[第一步·基础设施运维手册](/docs/deploy/step1-ops-manual)》。
+
+# 第一步·基础设施安装 —— 容器化部署指南
+
+| 项 | 值 |
+|---|---|
+| 适用工程 | `opic-deploy`（`gitcode.com/opic-ontology/opic-deploy`） |
+| 版本 | v1.0 · 2026-10-01 |
+| 对应规划 | 《116-规划-opic-deploy第一步-基础设施安装》§四（F0~F8）的**容器化模式**实现 |
+| 实测环境 | DEV `192.168.3.200` · Ubuntu 24.04.3 · x86_64 · 8C/15G · Docker 29.1.3 · Compose v5.0.1 |
+| 组件版本 | PostgreSQL 16-alpine · Redis 8.10.2-alpine · Traefik v3.7.10 · ZITADEL v4.19.3 · Casdoor latest · NATS 2.14-alpine · Temporal 1.29.0 · Harbor v2.15.2 |
+| 运维手册 | 《[第一步·基础设施运维手册](/docs/deploy/step1-ops-manual)》（启停/备份/升级/排障） |
+
+---
+
+## 一、部署形态与目录
+
+容器化模式 = 8 项基础设施全部以容器交付（数据面 Pigsty 形态见 116 号 §三决策 1，用于生产；本模式用于 DEV 与 minimal 档）：
+
+```
+宿主 192.168.3.200
+├── 统一入口  opic-traefik        :18880(web) :19443(websecure) :18887(dashboard)
+├── 数据面    opic-pg (16)        127.0.0.1:15432（回环排障口，容器网 opic-net 内 5432）
+│             opic-redis (8)      127.0.0.1:26379（同上）
+├── 身份面    opic-zitadel        经网关 auth.192.168.3.200.nip.io:18880
+│             opic-zitadel-login  （login 前端，仅容器网内 :3000）
+│             opic-casdoor        :18001
+├── 中间件    opic-nats           :14222(client) :8222(monitor)
+│             opic-temporal(+pg+ui) :7233(gRPC) :8233(UI)
+└── 镜像仓    harbor(安装器自管)   :18700
+```
+
+- 所有栈通过外部 Docker 网络 `opic-net` 互联；数据目录统一在 `/opt/opic/`。
+- 部署根目录：`/opt/opic-deploy-step1`（独立于既有 `/opt/opic-deploy` 域中心目录）。
+- **端口规划依据**：宿主 80/443 被系统 nginx 占用、8080 被 kube-router 占用、8000/4222/5432/16379/18090-18115/18443/8880-8881/8086 被既有容器（go-admin-kit、zt-traefik、oc-redis 等）占用 → 全部让开。
+
+## 二、快速开始（3 条命令）
+
+```bash
+cd /opt/opic-deploy-step1
+bash bin/install-step1.sh                 # F0~F8 全量（含 Harbor）
+bash bin/install-step1.sh --no-registry   # 跳过 Harbor（离线拿不到安装包时）
+bash bin/verify-step1.sh                  # 八项健康门禁（可随时重跑）
+```
+
+`install-step1.sh` 幂等可重跑：已存在的 `.env` 不会被覆盖，已健康的栈会秒过。
+
+## 三、F0~F8 执行序与手动对应
+
+| 序 | 内容 | 脚本/命令 | 通过判据 |
+|:--:|---|---|---|
+| F0 | 主机与运行时 | `docker info`、`docker network create opic-net`（脚本自动） | Docker 24+/Compose v2 可用、网络存在、磁盘 ≥20G |
+| F1 | 凭据与密钥 | `bash bin/gen-env.sh` | `.env`（600）生成，8 个口令/masterkey 齐备 |
+| F2 | 数据目录 | `mkdir -p /opt/opic/{database/pgdata,redis/data,harbor/data}` | 目录存在 |
+| F3 | 镜像准备＋Traefik 壳 | `stacks/traefik` up | `/ping` 200、dashboard 可达 |
+| F4 | PG HA(单机)＋Redis | `stacks/database`、`stacks/redis` | `pg_isready`、三库（zitadel/casdoor/opicdb）就绪、`PING→PONG` |
+| F5 | ZITADEL＋Casdoor | `stacks/zero-trust`、`stacks/casdoor` | healthz 200 经网关、login 可达、casdoor 建表 |
+| F6 | NATS→Temporal | `stacks/nats`、`stacks/temporal` | `/jsz` 无 error、Temporal cluster health |
+| F7 | Harbor | `stacks/registry`（官方安装器自管；离线环境设 `HARBOR_INSTALLER_DIR` 指向已解压安装器） | `/api/v2.0/health` healthy |
+| F8 | 验证收口 | `bash bin/verify-step1.sh` | 八项门禁全绿 |
+
+## 四、配置源（.env 要点）
+
+- 唯一配置源是 `.env`（从 `.env.example` 生成），**口令只存在于该文件**；`configs/` 下无任何口令。
+- **ZITADEL_DOMAIN 与 ZITADEL_EXTERNALPORT 必须与浏览器地址栏一致**（OIDC issuer 由它构成）。DEV 用 `auth.192.168.3.200.nip.io:18880`（nip.io 泛解析到 192.168.3.200）；若内网无外网 DNS，在各访问机的 `/etc/hosts` 加 `192.168.3.200 auth.192.168.3.200.nip.io`。
+- **口令复杂度**：ZITADEL/Harbor 校验口令策略（大写+小写+数字+符号），`gen-env.sh` 生成 `Op1-` 前缀格式自动合规；手工填入口令时须自行满足。
+- **镜像源**：ZITADEL 官方镜像在 ghcr.io 且 **tag 带 `v` 前缀**（`ghcr.io/zitadel/zitadel:v4.19.3`），docker hub 无 v 前缀且部分国内 mirror 不收录——DEV `.env` 已指向 ghcr。Casdoor 无可核验版本 tag 源，默认 `latest`，首装后建议回填锁定。
+
+## 五、部署后的入口与凭据
+
+| 组件 | 入口 | 初始凭据（均在 `.env`） |
+|---|---|---|
+| Traefik dashboard | http://192.168.3.200:18887/dashboard/ | 无（DEV 开放；生产必须关闭 `api.insecure`） |
+| ZITADEL 登录 | http://auth.192.168.3.200.nip.io:18880 | `zitadel-admin@zitadel.localhost` / `.env` 的 `ZITADEL_ADMIN_PASSWORD` |
+| ZITADEL Console | http://auth.192.168.3.200.nip.io:18880/ui/console | 同上 |
+| Casdoor | http://192.168.3.200:18001 | `admin` / `123` —— **首登必须改密** |
+| Temporal UI | http://192.168.3.200:8233 | 无认证（内网；对外暴露前必须加网关鉴权） |
+| NATS monitor | http://192.168.3.200:8222 | 客户端鉴权：`.env` 的 `NATS_USER/NATS_PASSWORD` |
+| Harbor | http://192.168.3.200:18700 | `admin` / `.env` 的 `HARBOR_ADMIN_PASSWORD` |
+| PostgreSQL | 容器网 `opic-pg:5432`；回环 `127.0.0.1:15432` | `postgres` / `.env` 的 `PG_ADMIN_PASSWORD` |
+| Redis | 容器网 `opic-redis:6379`；回环 `127.0.0.1:26379` | `.env` 的 `REDIS_PASSWORD` |
+
+## 六、首次部署实测记录与已知坑
+
+2026-10-01 在 192.168.3.200 实测过程中发现并已修复/规避的问题（新环境部署遇到同类症状可直接对号入座）：
+
+1. **compose healthcheck 不支持 `environment` 键**：Redis 栈最初把 `REDISCLI_AUTH` 写在 healthcheck 内 → `additional properties 'environment' not allowed`。已改为 service 级 `environment` + healthcheck 里 `redis-cli ping`。
+2. **空端口变量会绑随机端口**：`"${REDIS_PORT:-}:6379"` 在变量为空时绑定随机宿主端口。已改为固定回环默认值（如 `127.0.0.1:26379:6379`）。
+3. **宿主端口冲突**：16379 被既有 `oc-redis` 占用 → Redis 换 26379；80/443/8080/8000/4222/5432 均被占用 → 全部高位让开（见 §一端口表）。
+4. **共享 docker.sock 的发现污染**：宿主上 go-admin-kit 等容器自带 traefik labels，会被新 Traefik 收编 → 加 `--providers.docker.constraints=LabelRegex(\`opic.stack\`,\`.+\`)`，只发现带 `opic.stack` 标签的 OPIC 容器。
+5. **traefik healthcheck 404**：scratch 镜像无 curl/wget，`traefik healthcheck` 需显式传入口点与地址：`--ping=true --ping.entrypoint=web --entrypoints.web.address=:80`。
+6. **ZITADEL 镜像源**：docker hub 镜像在部分国内 mirror 不在白名单 → 用 ghcr.io（tag 带 `v` 前缀）。
+7. **ZITADEL 口令复杂度**：首实例初始化会校验 admin 口令复杂度（`PasswordComplexityPolicy.HasUpper`），纯小写 hex 口令导致 setup 失败 → 口令生成改为 `Op1-` 前缀格式。
+8. **ZITADEL healthcheck 死锁**：traefik 会过滤非 healthy 容器，而 `zitadel ready` 拨测经网关的外部域名 → 路由不注册 ↔ 不 healthy 互等。栈内**刻意不设 healthcheck**，就绪判定由 post-install 网关门禁承担。
+9. **bootstrap 卷属主**：Docker 命名卷默认 root，zitadel（uid 1000）写 login-client PAT 报 permission denied → 栈内加一次性 `init-perms` 容器 chown。
+10. **跨容器 traefik label**：Traefik 的 service 只指向 label 所在容器 —— login 路由必须挂在 login 容器上（挂 API 容器上会 502）。
+11. **Casdoor 双坑**：`dbName` 只从 `conf/app.conf` 读（env DSN 只管连接），缺了报 `zero-length delimited identifier`；`--createDatabase=true` 需 CREATEDB 权限，库已由 database 栈建好时不带该参数。
+12. **NATS `max_streams`**：不接受服务器级配置（2.14 报 unknown field），属账号级限额。
+13. **Temporal 版本天花板**：`temporalio/auto-setup` 上游最高 1.29.x（docker-compose 仓已归档，无 1.30+ 镜像），全仓统一 1.29.0；镜像在受限网络可经任一可出网机器 `docker save` → `scp` → `docker load` 迁移。admin-tools 无 1.29.0，用 1.30.4（向后兼容）。
+14. **跨架构镜像搬运**：从 Apple Silicon 机器 `docker save` 导出的默认是 arm64 变体，搬到 x86 宿主容器起不来（仅日志一行 platform mismatch）→ 导出前必须 `docker pull --platform linux/amd64`。
+
+## 七、与生产形态（Pigsty）的切换
+
+容器化模式是 minimal/DEV 形态。切生产时（116 号 §三决策 1）：
+
+1. 数据面改由 Pigsty 主机级安装（PG HA + Redis 模块），`stacks/database`、`stacks/redis` 停用；
+2. ZITADEL/Casdoor/Temporal 的数据库连接指向 Pigsty 实例（改 `.env` 的 host/端口与 SSL 模式）；
+3. Traefik 关闭 `api.insecure`，启用 TLS（证书由 O-CRT 域供给）；
+4. Temporal 库并入 Pigsty 统一实例（`temporal`/`temporal_visibility` 由 Pigsty 建库授权）。
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/deploy/step1-ops-manual/index.md
+================
+
+# 第一步·基础设施运维手册
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+# 第一步·基础设施运维手册
+
+> 本文是 [opic-deploy](https://gitcode.com/opic-ontology/opic-deploy) 工程 `docs/运维手册-step1.md` 的官网镜像（事实源在该仓）；
+> 部署流程见《[第一步·基础设施容器化部署](/docs/deploy/step1-containerized)》，生产形态方案见《[OPIC 基础设施生产部署](/docs/deploy/prod-deployment-plan)》。
+
+# 第一步·基础设施运维手册（step1 Ops Manual）
+
+| 项 | 值 |
+|---|---|
+| 适用范围 | opic-deploy 第一步 8 项基础设施（容器化模式，DEV/单机形态） |
+| 版本 | v1.0 · 2026-10-01 |
+| 部署指南 | 《[第一步·基础设施容器化部署](/docs/deploy/step1-containerized)》 |
+| 纪律来源 | 115 号 §6.3 启停纪律（启动正序、停止逆序、回滚优先 `down` 非 `down -v`） |
+
+---
+
+## 一、日常启停
+
+```bash
+cd /opt/opic-deploy-step1
+
+# 启动（正序，幂等）
+bash bin/install-step1.sh
+
+# 停止（逆序，数据保留）
+bash bin/teardown-step1.sh
+
+# 停止并删除数据（⚠ 破坏性，需输入 PURGE 确认；.env 保留）
+bash bin/teardown-step1.sh --purge
+```
+
+单栈操作（不破坏顺序语义时）：
+
+```bash
+cd stacks/<name> && docker compose ps|logs -f|restart|up -d|down
+```
+
+## 二、健康检查
+
+一键八项门禁（可进 crontab 巡检）：
+
+```bash
+bash bin/verify-step1.sh        # 全绿退出码 0
+```
+
+逐组件手工探针：
+
+| 组件 | 命令 |
+|---|---|
+| PostgreSQL | `docker exec opic-pg pg_isready -U postgres` |
+| Redis | `docker exec opic-redis redis-cli --no-auth-warning -a "$REDIS_PASSWORD" ping` |
+| Traefik | `curl -s http://127.0.0.1:18880/ping` |
+| ZITADEL | `curl -s -H "Host: auth.192.168.3.200.nip.io" http://127.0.0.1:18880/debug/healthz` |
+| Casdoor | `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18000/` |
+| NATS | `curl -s http://127.0.0.1:8222/healthz` |
+| Temporal | `docker run --rm --network opic-net --entrypoint temporal temporalio/admin-tools:1.30.4 operator cluster health --address temporal:7233` |
+| Harbor | `curl -s http://127.0.0.1:18700/api/v2.0/health` |
+
+## 三、凭据与密钥管理
+
+- **唯一口令源是 `/opt/opic-deploy-step1/.env`**（权限 600）。丢失即失去全部凭据。
+- **`ZITADEL_MASTERKEY`（32 字符）是最高优先级密钥**：ZITADEL 用它加密库内全部密钥材料，丢失 = ZITADEL 既有数据不可用。备份要求：`.env` 加密存放（如 `age`/`gpg`），至少一份异地。
+- 改口令流程：改 `.env` → `docker compose up -d`（重建受影响容器）。**ZITADEL masterkey 不可换**（换了等于销毁数据）；应用口令（PG/Redis/NATS 等）在容器重建后即生效，PG 已建角色的口令需同步 `ALTER ROLE`。
+
+## 四、备份与恢复
+
+| 对象 | 备份 | 恢复 |
+|---|---|---|
+| PostgreSQL（全部库） | `docker exec opic-pg pg_dumpall -U postgres \| gzip > /backup/pg-$(date +%F).sql.gz` | `gunzip -c <file> \| docker exec -i opic-pg psql -U postgres` |
+| Redis | `docker exec opic-redis redis-cli --no-auth-warning -a "$REDIS_PASSWORD" BGSAVE` 后拷 `/opt/opic/redis/data/appendonlydir/` | 停栈 → 拷回数据目录 → 起栈 |
+| ZITADEL | `.env`（masterkey）+ 上面的 PG 备份（含 zitadel 库） | 两者配对恢复，缺一不可 |
+| NATS JetStream | 拷 `/opt/opic/nats/data/jetstream/`（建议先停 nats 容器保证一致） | 停栈 → 拷回 → 起栈 |
+| Temporal | PG 备份（含 temporal/temporal_visibility） | 随 PG 恢复 |
+| Harbor | 拷 `/opt/opic/harbor/data/`（含 registry 数据与 harbor DB，建议停机冷备） | 停 harbor → 拷回 → 起 harbor |
+
+建议最小巡检 cron（示例，每天 02:00 备份 + 每小时探针）：
+
+```cron
+0 2 * * * docker exec opic-pg pg_dumpall -U postgres | gzip > /backup/pg-$(date +\%F).sql.gz
+0 * * * * /opt/opic-deploy-step1/bin/verify-step1.sh || echo "step1 门禁异常" | wall
+```
+
+## 五、升级与回滚
+
+```bash
+# 升级某组件：改 .env 的 *_IMAGE_TAG → 拉新镜像 → 逆序停 → 正序起
+vim .env                                    # 如 TRAEFIK_IMAGE_TAG=v3.7.13
+cd stacks/traefik && docker compose pull
+cd ../.. && bash bin/teardown-step1.sh && bash bin/install-step1.sh
+```
+
+- **ZITADEL 升级**：小版本直接升；跨大版本先读官方迁移公告（schema 由其自管）。
+- **回滚**：`.env` 改回旧 tag 后同样流程；数据目录不删（bind mount），旧版本可直接挂回。
+- **不要 `down -v`**：它只清匿名卷、清不掉 bind mount 数据，但会误删 ZITADEL bootstrap 卷等具名卷。
+
+## 六、监控与日志
+
+| 端点 | 用途 |
+|---|---|
+| Traefik dashboard `:18887/dashboard/` | 路由/中间件/后端健康 |
+| Traefik API `:18887/api/http/routers` | 程序化巡检路由注册 |
+| NATS `:8222/varz`、`/jsz`、`/connz` | 运行指标、JetStream、连接 |
+| Temporal UI `:8233` | 工作流执行历史 |
+| Harbor `/api/v2.0/health`、`/api/v2.0/systeminfo` | 仓库健康 |
+| `docker compose logs -f <svc>`（各栈目录） | 逐栈日志；Traefik 开启了 accesslog |
+
+## 七、安全基线（对外/上生产前必须逐项核对）
+
+1. Casdoor `admin/123` **首登改密**；ZITADEL admin 口令确认已按复杂度设置并轮换。
+2. Traefik 关闭 `api.insecure`（dashboard 走受控路由+鉴权）。
+3. Temporal gRPC/UI 默认**无认证**——只允许内网，对外必须经网关加认证（或启用 mTLS）。
+4. NATS monitor 8222 不暴露公网；跨机时客户端与监控启用 TLS。
+5. PG/Redis 回环排障口（15432/26379）只在本机使用；生产建议注释 compose 的 `ports` 段。
+6. `.env` 600 且不进 git；`.env` 备份加密。
+7. Traefik 发现约束 `opic.stack` 标签必须保留——否则会收编宿主上其他项目的 traefik 路由（实测教训，见部署指南 §六）。
+
+## 八、故障排查速查
+
+| 症状 | 排查 | 处置 |
+|---|---|---|
+| 容器反复重启 | `docker logs <container> --tail 50` | 按日志对号 §九/部署指南 §六 |
+| `port is already allocated` | `ss -tlnp \| grep <port>` 找占用容器 | `.env` 换端口（DEV 常见：80/443/8080/8000/4222/5432/16379 均被占） |
+| 镜像拉取超时/白名单 | 换镜像源：docker hub tag 不带 `v`、ghcr tag 带 `v`；或 mirror 前缀直拉后 `docker tag` | ZITADEL 用 `ghcr.io/zitadel/zitadel:v4.x` |
+| ZITADEL setup 报 `PasswordComplexityPolicy` | 口令缺大写/符号 | `.env` 换 `Op1-` 前缀口令，重置库（见下）重装 |
+| ZITADEL 经网关 404/instance not found | Host 头与 `ZITADEL_DOMAIN` 不一致 | curl 加 `-H "Host: $ZITADEL_DOMAIN"`；浏览器走 nip.io 域名 |
+| nip.io 解析不了（内网无外网 DNS） | `nslookup auth.192.168.3.200.nip.io` | 访问机 `/etc/hosts` 加 `192.168.3.200 auth.192.168.3.200.nip.io` |
+| Harbor 安装器下载失败 | `packages/` 放离线 tgz 后重跑 `stacks/registry/pre-install.sh` | 离线包地址见 harbor releases |
+| Traefik 路由缺失 | dashboard 查 routers；确认目标容器带 `opic.stack` 标签且 `traefik.enable=true` | 补标签 |
+| 磁盘 >90% | `docker system df`、`du -sh /opt/opic/*` | `docker image prune -f`；清旧镜像 tag |
+
+**ZITADEL 数据重置（仅 DEV，破坏性；`down -v` 与任何栈目录操作前必须先 `set -a; source ../../.env; set +a`，compose 对 down/ps 也要插值）**：
+
+```bash
+cd stacks/zero-trust && docker compose down && cd ../..
+docker exec opic-pg psql -U postgres -c "DROP DATABASE IF EXISTS zitadel WITH (FORCE);" \
+  -c "CREATE DATABASE zitadel OWNER zitadel;"
+cd stacks/zero-trust && docker compose up -d && bash post-install.sh
+```
+
+## 九、历史实测问题台账（2026-10-01 DEV 192.168.3.200）
+
+| # | 症状 | 根因 | 修复 |
+|:--:|---|---|---|
+| 1 | redis compose 校验失败 `additional properties 'environment'` | healthcheck 段不支持 environment 键 | 移到 service 级 environment，healthcheck 用 `redis-cli ping` |
+| 2 | redis 启动报 0.0.0.0:16379 已分配 | 空值端口变量绑随机口 + 宿主 oc-redis 占 16379 | compose 固定回环默认端口，DEV 换 26379 |
+| 3 | traefik 判 unhealthy（404） | scratch 镜像 healthcheck CLI 默认探 8080，ping 在 web:80 | healthcheck 显式传 `--ping.entrypoint=web --entrypoints.web.address=:80` |
+| 4 | traefik 收编 go-admin-kit 路由 | 共享 docker.sock + 对方容器有 traefik labels | `providers.docker.constraints=LabelRegex(\`opic.stack\`,\`.+\`)` |
+| 5 | zitadel/zitadel-login 拉取失败 | hub 镜像不在 mirror 白名单；tag 前缀 hub 无 v / ghcr 带 v | 改 ghcr.io + `v4.19.3` |
+| 6 | zitadel 首启 setup 失败 `PasswordComplexityPolicy.HasUpper` | 生成口令纯小写 hex 不满足复杂度策略 | gen-env 口令改 `Op1-` 前缀（大写+小写+数字+符号） |
+| 7 | zitadel 反复重启 `login-client.pat: permission denied` | 命名卷 root 属主 × 镜像 uid 1000，且镜像内无该目录可继承 | 栈内加一次性 `init-perms` 容器 chown 卷 |
+| 8 | login 经网关 502（healthz 正常） | login 路由 label 挂在了 API 容器上 | Traefik service 只指向 label 所在容器 → 路由迁到 login 容器 |
+| 9 | traefik 路由始终不注册 | traefik 过滤非 healthy 容器 × `zitadel ready` 拨测经网关外部域名 = 死锁 | zitadel 不设 healthcheck，门禁交给 post-install |
+| 10 | casdoor panic `zero-length delimited identifier` | `dbName` 只从 app.conf 读 | app.conf 补 `dbName = casdoor` |
+| 11 | casdoor panic `permission denied to create database` | `--createDatabase` 需 CREATEDB；库已存在 | 去掉该参数，建表由 orm 自理 |
+| 12 | nats `unknown field "max_streams"` | 该限额是账号级配置 | 从服务器配置移除 |
+| 13 | temporalio/auto-setup:1.30.4 全源 manifest unknown | 上游 docker-compose 仓已归档，无 1.30+ 镜像 | 全仓统一 1.29.0（受限网络经代理机 `docker save`/`load` 迁移；admin-tools 用 1.30.4，CLI 对 1.29 server 向后兼容） |
+| 14 | harbor prepare `KeyError: max_job_workers` | 手写精简模板缺 v2.12 必需键集 | 模板改为官方 v2.12 全键集（harbor.yml.tpl） |
+| 15 | login 反复 not ready：`SESSION_COOKIE_SECRET ... at least 32 characters` | gen-env 的 Op1- 前缀格式仅 28 位 | cookie secret 改 `openssl rand -hex 32`（≥32 字符，官方口径） |
+| 16 | temporal 建命名空间 `dial tcp [::1]:7233` | CLI 未传 --address 回落容器自身 localhost | post-install 统一注入 `--address temporal:7233` |
+| 17 | TLS 模式下 post-install healthz 404 | 探测仍打 web(http) 入口，路由已迁 websecure | 探测按 TRAEFIK_TLS 切 https/websecure（-k 自签） |
+| 18 | **rsync 多源误平铺**：`rsync -a stacks/ bin/x host:dest/` 把 stacks 内容平铺到 dest 根 | 多源 rsync 各源独立拷贝进 dest | 单目录同步始终单源调用；事故已恢复（真实目录从本地仓重灌 + 证书重生成） |
+| 19 | Harbor 容器被保留名单误清（redis/registry/registryctl 不带 harbor- 前缀） | 清理按名称前缀分类不可靠 | 按完整名单核对；恢复走安装器 compose `up -d`（配置卷完好即无损） |
+| 20 | http→https 重定向动态路由不生效 | gen-certs 幂等早退跳过了 redirect 配置段 | 重定向与证书生成解耦：重定向处理置于幂等早退之前 |
+
+---
+
+## 十、生产形态（Pigsty）运维增补
+
+> 生产形态按《OPIC 基础设施生产部署方案》（工程内嵌副本 《[OPIC 基础设施生产部署](/docs/deploy/prod-deployment-plan)》，主件在 opic-ontology 工作区 output/118 号）执行：数据面（PG HA + Redis）由 Pigsty 主机级托管，应用面仍是本仓 compose。本章只讲**与容器化模式不同的运维动作**；通用纪律（§一~§九）继续适用。
+
+### 10.1 架构速览与端口语义
+
+```
+应用节点(node-4)                      数据节点(node-1/2/3)
+Traefik :443(TLS) ──┐                 Patroni(:8008) + etcd(:2379)
+ZITADEL/Casdoor/…   ├─► haproxy VIP ── :5433 → primary（读写）
+NATS/Temporal       │    (node-1/2/3)  :5434 → replicas（只读/负载均衡）
+Harbor :8443 ───────┘                 PGBackRest → node-3 存储 → 异地
+Pigsty INFRA(node-3): Grafana :3000 / Prometheus :9090（仅内网）
+```
+
+- **5433 = 读写（primary）**，**5434 = 只读（replicas 轮询）**——应用连接串按读写分离分别配置；VIP 漂移不影响这两端口语义。
+- 应用栈的 `.env.prod` 中库地址一律写 **VIP:5433**（不直连节点 IP，failover 才无感）。
+
+### 10.2 日常巡检（数据面）
+
+```bash
+# 集群角色与复制状态（任一数据节点）
+patronictl -c /etc/patroni/patroni.yml list
+# haproxy 后端健康（node-4 或管理机）
+curl -s http://node-1:7000/stats; csv  # 或访问 haproxy 统计页
+# 复制延迟（primary 上）
+psql -h <vip> -p 5433 -U postgres -c "SELECT client_addr, state, sync_state, replay_lag FROM pg_stat_replication;"
+# 备份有效性
+pgbackrest --stanza=pgsql info        # 最新备份须为 available，无 error
+# Redis
+redis-cli -h <redis-vip> PING && redis-cli -h <redis-vip> INFO replication | grep -E "role|master_link"
+```
+
+巡检最小集（进 crontab，每小时）：复制延迟 >10s、WAL 目录堆积、磁盘 >85%、`pgbackrest info` 有 error、 Patroni 成员非 running。
+
+### 10.3 主备切换与故障处置
+
+```bash
+# 计划内切换（低峰窗口；switchover 自带回切点记录）
+patronictl -c /etc/patroni/patroni.yml switchover opic-pg --leader node-1 --candidate node-2
+# 主库真故障：Patroni 自动 failover（etcd 仲裁），无需人工；事后
+patronictl list                        # 确认新 primary
+pgbackrest --stanza=pgsql backup       # 尽快补一次全量基备
+# 旧主回归：自动降级为 standby 并跟进新主（pg_rewind）；若失败
+patronictl reinit opic-pg <旧主>       # ⚠ 以新主数据为基准重建
+```
+
+**纪律**：切换演练每季度一次（118 号 §五）；failover 后 10 分钟内完成 `pgbackrest backup`，否则视为未收口。
+
+### 10.4 备份恢复（PGBackRest）
+
+```bash
+# 手动全量/增量
+pgbackrest --stanza=pgsql --type=full backup
+pgbackrest --stanza=pgsql --type=incr backup
+# 恢复演练（每月；恢复到临时目录验证，不覆盖生产）
+pgbackrest --stanza=pgsql --set=<最新全量名> \
+  --delta --target-action=promote --type=time "--target=2026-10-01 12:00:00+08" \
+  --pg1-path=/data/pgsql/restore-check restore
+# 恢复后校验：库数、行数抽样、ZITADEL instance 表存在
+```
+
+RPO ≤5 分钟 / RTO ≤30 分钟（118 号 §五）；演练记录归档 ops 台账，连续两月未演练按红线上报。
+
+### 10.5 证书与安全基线轮换
+
+- **通配符证书**（Traefik + Harbor 同一张）：新证书放 node-4 `/opt/opic/certs/` → `docker compose restart traefik` → Harbor 侧更新 `harbor.yml` 后 `cd harbor-installer && docker compose restart nginx`；到期前 30 天告警。
+- `api.insecure=false` 为生产硬约束——巡检项：`curl -s http://node-4:8088/api/http/routers` 必须**拒绝连接**。
+- `pg_hba.conf` 变更走变更单：改 `postgres_conf`（Pigsty 声明式）→ `patronictl reload` → `pg_hba_file_rules` 审计无 trust/宽网段。
+
+### 10.6 升级流程（生产）
+
+| 对象 | 顺序 | 回退锚点 |
+|---|---|---|
+| 应用面 compose | 改 `.env.prod` tag → `pull` → **逆序 down → 正序 up** | tag 回退（镜像不删） |
+| PG 小版本 | 先 `pgbackrest full` → switchover 到备 → 升旧主 → 再切回（滚动） | PITR |
+| Pigsty 版本 | 读 release note → 测试环境预演 → 生产按 node 逐台 playbook | 按库 dump + 旧版重装 |
+
+### 10.7 生产验收门禁（P9 核对单）
+
+- [ ] `patronictl list`：primary 唯一、全员 running、无同步失败
+- [ ] VIP:5433 读写 / :5434 只读 均通；应用栈均连 VIP（非节点 IP）
+- [ ] `pgbackrest info` 最新备份 available；月度演练在册
+- [ ] Redis 主从正常（role/master_link_status）
+- [ ] 五域名 https 证书链有效；`http://` 301；Traefik dashboard 未授权不可达
+- [ ] ZITADEL healthz/login、Casdoor、NATS `/jsz`、Temporal cluster health、Harbor `/api/v2.0/health` 全绿
+- [ ] 主备切换演练 + 恢复演练记录归档
+- [ ] `.env.prod` 与 masterkey 离线加密保管在册
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/deploy/prod-deployment-plan/index.md
+================
+
+# OPIC 基础设施生产部署方案
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+# OPIC 基础设施生产部署方案
+
+> 本文是 opic-ontology 工作区 `output/118-方案-OPIC基础设施生产部署.md` 的官网镜像（事实源在工作区与 opic-design/review 归档）；
+> 容器化（DEV）模式见《[第一步·基础设施容器化部署](/docs/deploy/step1-containerized)》。
+
+# OPIC 基础设施生产部署方案（Pigsty 生产形态）
+
+| 项 | 值 |
+|---|---|
+| 适用工程 | `opic-deploy`（`gitcode.com/opic-ontology/opic-deploy`） |
+| 版本 | v1.0 · 2026-10-01（同日完成单机生产档落地，见 §十一） |
+| 定位 | 第一步基础设施的**生产形态**部署方案（116 号 §三决策 1 的落地细化）；容器化模式（117 号，DEV 已实测 9/9）保留为 minimal 档 fallback |
+| 上游文档 | 《116-规划-opic-deploy第一步-基础设施安装》 v1.0（§八实测回填）、《115-部署顺序-opic-deploy》 v1.1（S 序与 J1~J7 判据） |
+| 覆盖范围 | 参考拓扑、域名与端口规划、安装编排 P0~P9、备份与高可用、安全基线、升级与回退、生产验收门禁 |
+| 同源维护 | 主 = `opic-ontology/output/118-方案-OPIC基础设施生产部署.md`；归档 = `opic-design/review/` 同名文件；工程内嵌 = `opic-deploy/docs/生产部署方案.md` |
+
+---
+
+## 一、一句话结论
+
+**生产形态 = Pigsty 主机级托管数据面（PG 高可用 + Redis，Ansible 幂等安装）＋ docker compose 托管应用面（ZITADEL/Casdoor/NATS/Temporal/Harbor）＋ Traefik TLS 统一入口（域名 + 证书）**；边界判据不变（116 号）：有持久状态且要主机级 HA → Pigsty，无状态或容器化优先 → compose。全流程映射 115 号 S 序，安装编排为 P0~P9（§四）。
+
+## 二、参考拓扑与节点规划
+
+> 拓扑是**参考基准**而非硬性要求——Pigsty 支持单机到任意规模，节点数按现场资源伸缩，角色边界（数据面/应用面分离）必须保持。
+
+### 2.1 节点角色
+
+| 节点 | 角色 | 承载 | 数量（最小/推荐） |
+|---|---|---|:--:|
+| node-1 | PG 主 | Pigsty PGSQL（primary）＋ etcd ＋ PGBackRest | 1/1 |
+| node-2 | PG 备 | Pigsty PGSQL（replica，流复制）＋ etcd | 1/1~2 |
+| node-3 | 基础设施 | etcd（仲裁）＋ Pigsty INFRA（Prometheus/Grafana 采集面）＋ 备份存储挂载（NFS/对象网关） | 1/1 |
+| node-4 | 应用面 | docker compose 全栈：Traefik、ZITADEL、Casdoor、NATS、Temporal、Harbor | 1/2（keepalived VIP） |
+
+- **最小生产 = 3 节点**（etcd 三副本分布 node-1/2/3；应用面暂与 node-3 合署，标注重载）；**标准 = 4 节点**（应用面独立）。
+- Redis 由 Pigsty REDIS 模块部署（随 PGSQL 节点或独立 `redis.yml` 拓扑，v1 建议 1 主 1 复制挂 node-1/2）。
+
+### 2.2 节点基础要求（P0 输入）
+
+| 项 | 要求 |
+|---|---|
+| 操作系统 | EL 8/9 或 Ubuntu 22/24（Pigsty 4.5 支持矩阵），x86_64 |
+| 硬件 | 数据节点：≥8C/32G，数据盘 NVMe/SSD 独立挂 `/data`（≥1T）；应用节点：≥8C/16G，系统盘 ≥200G |
+| 网络 | 节点间内网互通（建议万兆或 ≥1G）、统一 VIP（keepalived，浮在 haproxy 前）、出网或离线仓库二选一 |
+| 时钟 | chrony 与内网 NTP 源同步（偏差 >100ms 会影响复制与证书） |
+| SSH | 管理机（node-3）到全部节点 root 免密（Ansible 前提） |
+
+### 2.3 域名与证书规划（全部走 node-4 Traefik，Harbor 除外）
+
+| 域名（以 `opic.example.com` 为例） | 指向 | 用途 |
+|---|---|---|
+| `auth.opic.example.com` | node-4:443（Traefik） | ZITADEL（ExternalDomain，**必须与之一致**） |
+| `casdoor.opic.example.com` | node-4:443 | Casdoor |
+| `nats.opic.example.com` | node-4:443 | NATS monitor（内网解析） |
+| `temporal.opic.example.com` | node-4:443 | Temporal UI |
+| `harbor.opic.example.com` | node-4:**8443**（Harbor 自管 nginx，TLS） | 镜像仓库（v1 独立证书端口，避免双层代理；v2 可收编 Traefik） |
+| 证书 | 通配符 `*.opic.example.com` | 来源二选一：企业 CA / O-CRT 域签发（推荐）；Let's Encrypt 需出网 |
+
+## 三、与 DEV 容器化模式的差异总表
+
+| 维度 | DEV 容器化（117 号实测） | 生产形态（本方案） |
+|---|---|---|
+| PostgreSQL | `postgres:16-alpine` 单实例容器 | Pigsty PG HA：Patroni + etcd + haproxy(:5433 rw/:5434 ro) + VIP + PGBackRest |
+| Redis | `redis:8` 容器 | Pigsty REDIS 模块（主机级） |
+| Temporal PG | 栈内独立 PG 容器 | **并入 Pigsty 统一实例**（`temporal`/`temporal_visibility`，116 号 §4.1 收敛选路②） |
+| IdP 库 | opic-pg 容器 | Pigsty 实例（库/角色由 `pigsty.yml` 声明式创建，替代 docker init 脚本） |
+| 入口 | Traefik :18880，api.insecure=true，nip.io | Traefik **:443 TLS**，api.insecure=false，企业域名 + 通配符证书，http→https 重定向 |
+| Harbor | v2.12.2 离线安装器，http :18700 | v2.15.2（在线或离线包），**https :8443** 自管证书 |
+| 备份 | 手工 pg_dumpall（手册 §四） | PGBackRest 自动：周全量 + 日增量 + WAL 归档，落 node-3 存储并异地拷贝 |
+| 监控 | 手工探针 + 门禁脚本 | Pigsty INFRA 采集面（PG/Redis/节点）保留，聚合告警归 O-MON（第二步） |
+| 口令管理 | `.env` 600 | `.env.prod` 600 + age 加密分发 + 离线保管（masterkey 同） |
+| 回退 | —（即 fallback 本体） | 可整体回退到容器化模式（数据经 dump/restore 迁移） |
+
+## 四、安装编排（P0~P9）
+
+> 映射 115 号 S 序：P0~P1≈S0/S1，P2~P3=S4（数据基座 Pigsty 形态），P4≈S2/S3，P5=入口（S3 壳），P6=S5，P7=S8，P8=S9，P9=S17 前段。启动正序、停止逆序纪律不变。
+
+| 序 | 步骤 | 要点 | 验收门禁 |
+|:--:|---|---|---|
+| **P0** | 主机前置 | 系统参数（`vm.overcommit`、透明大页 off、swappiness=1）、防火墙最小端口（§六表）、chrony、数据盘挂 `/data`、SSH 互信、**离线介质分发**（Pigsty offline 包 / Harbor offline tgz / compose 镜像 tar，均放入 node-3 统一目录） | `ansible all -m ping`、`chronyc tracking` 偏差达标、防火墙端口核对脚本通过 |
+| **P1** | 凭据与密钥 | 从 `.env.example` 派生 **`.env.prod`**（gen-env.sh 可复用），追加：`PG_ADMIN_PASSWORD`（Pigsty `pg_admin_password`）、Patroni/etcd 口令、各库属主口令、TLS 证书路径、`HARBOR_VERSION=v2.15.2`；证书文件分发 node-4 `/opt/opic/certs/` | `.env.prod`（600）+ 证书就位；age 加密备份一份离线 |
+| **P2** | Pigsty 安装（数据面） | node-3 上 `get-pigsty`（离线包）→ 编写 `pigsty.yml`：`nodes[]`=node-1/2/3、`pg_cluster=opic-pg`、`pg_databases[]`=`[opicdb,zitadel,casdoor,temporal,temporal_visibility]`、`pg_users[]`=各业务角色（见 §四.附）、启用 `redis.yml` 拓扑 → `ansible-playbook pigsty.yml` → `ansible-playbook redis.yml` | `patronictl list` 全员 running/primary 唯一；`curl node-VIP:5433`（rw）与 `:5434`（ro）通；VIP ping 通；`redis-cli -h <vip> PING`；`pgbackrest --stanza=pgsql check` 通过 |
+| **P3** | 建库授权核对 | Pigsty 已声明式建库建角色；核对：库 5 个、属主角色与 `.env.prod` 口令一致、`pg_hba.conf` 仅放行应用网段（scram-sha-256），禁 `trust` | `psql` 逐库连接验证 + `pg_hba_file_rules` 审计无宽放行 |
+| **P4** | 应用节点前置 | node-4 安装 Docker 24+/Compose v2、建 `opic-net`、`/opt/opic/{data,certs}`、离线导入 compose 镜像 tar（ZITADEL/Casdoor/NATS/Temporal/Traefik 五栈，版本口径 = 117 号实测：ZITADEL ghcr v4.19.3、Temporal 1.29.0） | `docker info`、`docker load` 清单核对、DNS 解析五个域名到 node-4 |
+| **P5** | Traefik（TLS 入口） | 复用 `stacks/traefik`，生产差异：`TRAEFIK_WEB_PORT=80`、`TRAEFIK_WEBSECURE_PORT=443`、**关闭 `api.insecure`**、追加 `--entrypoints.web.http.redirections.entrypoint.to=websecure`、证书动态文件配置（通配符证书挂 `/opt/opic/certs`） | `https://auth.opic…` 证书链通过；`http://` 301 到 https；dashboard 无未授权访问 |
+| **P6** | ZITADEL ＋ Casdoor | 复用 `stacks/zero-trust`/`stacks/casdoor`，生产差异：库 host=node-VIP（haproxy 5433）、`ZITADEL_EXTERNALSECURE=true`、`ZITADEL_DOMAIN=auth.opic…`、`ZITADEL_EXTERNALPORT=443`、Casdoor 走 `casdoor.opic…`（443）；login-client PAT / masterkey 流程同 DEV（volume chown init 容器保留） | healthz 与 login 经 **https 域名** 200；ZITADEL 库在 Pigsty 实例（`\l` 可见且非容器） |
+| **P7** | NATS → Temporal | NATS monitor 仅内网 DNS；Temporal：`DB` 指向 Pigsty VIP（库名/口令为 P2 声明值），auto-setup 迁移自身 schema（116 号 §3.2 豁免不变），admin-tools 1.30.4 | `/jsz` 无 error；`operator cluster health` OK；UI 经 https 域名可达 |
+| **P8** | Harbor（v2.15.2） | 官方安装器（在线或离线 tgz），`harbor.yml`：`https.port=8443` + 通配符证书、`external_url=https://harbor.opic…`、`data_volume=/opt/opic/harbor/data`（独立盘/NFS）；`HARBOR_ADMIN_PASSWORD` 走 `.env.prod` | `https://harbor.opic…/api/v2.0/health` healthy；`docker login` + push/pull 演练一镜像 |
+| **P9** | 验证收口 | 九项生产门禁（表下）＋ **两项演练**：① patroni switchover 主备切换，应用连接无感知（haproxy 重路由 ≤10s）；② pgbackrest 恢复演练（restore 到临时目录 + PITR 校验） | 门禁脚本全绿 + 两项演练记录归档（117 号 verify-step1.sh 改造为生产版：PG 门禁指向 VIP:5433，其余同） |
+
+**§四.附：Pigsty 声明式建库清单（写入 pigsty.yml）**
+
+> **建库规则（用户规则，2026-10-01）**：OPIC 全部能力中心**共用一个数据库实例 `opicdb`，每个能力中心为单独的一个 schema**。第三方引擎（ZITADEL/Casdoor/Temporal）不属能力中心，因引擎限制（ZITADEL/Temporal 要求独占数据库命名空间）保留独立库——此为该规则的**显式边界**，随本方案登记。
+
+| 库 | 内容 | 属主角色 | 消费方 |
+|---|---|---|---|
+| `opicdb`（唯一业务库） | **23 个中心 schema**（每中心一个）：`osec osys oarc odbs oreg ocrt ovpn oign oclc oosc oadd oast ousr opip oapp ocsc oapf oopr odat omdl oknb omon ocmp`（域码小写） | `opicdb_owner`（组角色；第二步各中心上线时按域发专属登录角色并授权对应 schema） | 23 个能力中心（中心内 migrations/ 纪律不变，禁跨 schema 外键，跨中心只走 API+Event Bus） |
+| `zitadel` | 引擎自管 schema | `zitadel` | stacks/zero-trust（运维侧 IdP） |
+| `casdoor` | 引擎自管表 | `casdoor` | stacks/casdoor（租户侧 IdP） |
+| `temporal` / `temporal_visibility` | 引擎自管 schema | `temporal` | stacks/temporal（standard visibility，无 ES） |
+
+## 五、备份与高可用设计
+
+| 对象 | 策略 | 恢复目标 |
+|---|---|---|
+| PostgreSQL | PGBackRest：周日全量 + 周中增量 + WAL 连续归档，保留 30 天；备份先落 node-3 本地存储，再同步异地（NFS/对象存储） | RPO ≤ 5 分钟（WAL 归档间隔），RTO ≤ 30 分钟（restore + PITR） |
+| PG 高可用 | Patroni 自动 failover（etcd 仲裁）；计划内维护走 `patronictl switchover`（低峰窗口） | 切换 ≤ 10s（haproxy 健康探测间隔内） |
+| Redis | 主从 + AOF everysec；随 Pigstu REDIS 模块管理 | 缓存语义，可重建 |
+| ZITADEL masterkey | 与 `.env.prod` 同级加密离线保管（**丢失即 ZITADEL 数据作废**） | — |
+| Harbor | `/opt/opic/harbor/data` 冷备周度（停机窗口）或外接对象存储 | 镜像可重推，优先保库 |
+| 演练 | **月度恢复演练**（pgbackrest restore → PITR 校验）＋ 季度主备切换演练 | 演练记录归档至 ops 台账 |
+
+## 六、安全基线（生产版，上线前逐项核对）
+
+1. **防火墙最小端口**：node-1/2/3 仅放行节点间网段（5433/5434/8008 patroni/2379-2380 etcd/9100-9101 exporter/22 管理网）；node-4 对外仅 80/443/8443，22 限管理网；Pigsty Grafana(3000)/Prometheus(9090) 仅内网。
+2. `pg_hba.conf`：仅应用网段 + 管理网段，`scram-sha-256`，禁 `trust`；变更走变更单。
+3. Traefik `api.insecure=false`（DEV 坑位结论直接继承）；dashboard 如需开放走 BasicAuth + 内网 ACL。
+4. 全站 TLS：五域名证书链校验入月度巡检；证书到期前 30 天告警（O-MON 或 cron）。
+5. SSH：key-only、禁 root 密码、fail2ban；管理操作留 `X-Trace-Id` 习惯（平台规则第 8 条审计头）。
+6. `.env.prod` 与 masterkey：age 加密存放于堡垒/密码库；**严禁入 git**（`.gitignore` 已排除 `.env*`）。
+7. Casdoor/ZITADEL 管理员首登改密并轮换；Harbor admin 同。
+
+## 七、监控与告警衔接
+
+- **采集面**：Pigsty INFRA 自带 Prometheus/Grafana（PG/PGPool/Redis/节点 exporter），保留为本机采集（116 号 §三决策 5）。
+- **聚合面**：O-MON（第二步）联邦采集上述 Prometheus；第一步期间用 Pigsty 内置告警最小集：复制延迟 >10s、WAL 堆积、磁盘 >85%、连接数 >80%、backup 失败、证书到期不足 30 天。
+- **门禁巡检**：verify 脚本（生产版）进 crontab 每小时，异常 `wall` + 消息通道。
+
+## 八、升级与回退
+
+| 场景 | 流程 | 回退 |
+|---|---|---|
+| Pigsty 小版本 | 先 pgbackrest 全量 → ansible playbook 升级（先 replica 后 primary，switchover 滚动） | 按库 dump + 旧版本重装回退；或 PITR |
+| PG 小版本 | 同上滚动：switchover → 升 replica → 提主 → 升旧主 | Patroni 回切 |
+| 应用面（compose） | 改 `.env.prod` tag → `pull` → **逆序 down → 正序 up**（115 号 §6.3） | tag 回退重部署 |
+| 整体回退容器化模式 |DEV 形态即 fallback：应用栈指回容器 PG（dump/restore 迁移） | 116 号 §五 |
+
+## 九、与 116/117 的关系
+
+- 116 号 §三决策 1（两分法）在本方案完整落地；§4.1 决策（Temporal 并库）随 P2 声明式建库一并关闭。
+- 117 号 DEV 实测结论**继续适用**于生产应用面：traefik label 挂目标容器、zitadel 不设 healthcheck（post-install 门禁）、init-perms 卷属主、casdoor `dbName` 与去 `--createDatabase`、nats 无服务器级 `max_streams`、镜像 tag 前缀（ghcr 带 v）与 `--platform linux/amd64` 搬运。
+- 数据迁移（DEV → 生产，如需）：dumpall 全量 + 角色口令对齐 `.env.prod`；不做在线复制。
+
+## 十、参考出处
+
+| 编号 | 内容 | 出处 |
+|:--:|---|---|
+| R-01 | 生产形态判据与两分法决策 | 116 号 §三决策 1/5、§五 |
+| R-02 | 拓扑序与启停纪律 | 115 号 v1.1 S0~S17、§6.3 |
+| R-03 | DEV 实测口径与坑位台账 | 117 号、opic-deploy 仓 docs |
+| R-04 | Pigsty 4.5 能力（PG HA/etcd/REDIS 模块/PGBackRest/INFRA） | pigsty.io（2026-10-01 核实） |
+| R-05 | 平台纪律（PG16+/opicdb、双 IdP、审计头、错误码） | `rules/` 导入件 |
+| R-06 | **能力中心共用实例 opicdb、每中心一个 schema**；第三方引擎独立库为显式边界 | 用户规则，2026-10-01（本表 §四.附） |
+
+---
+
+## 十一、实际落地回填（2026-10-01，单机生产档 v1）
+
+### 11.1 落点与偏差
+
+> **两条用户规则（2026-10-01 晚，正式定版）**：
+> ① **opic-ai 的生产环境 = 192.168.3.200 机器**（落点不再是权宜，是定版；§二多节点拓扑转为远期扩展预案）；
+> ② **192.168.3.200 使用泛域名 `*.opic-ai.ccoe.tech`**（DNS 已生效：`auth.opic-ai.ccoe.tech → 192.168.3.200`）。
+
+**实际落点：192.168.3.200 单机生产档**（`/opt/opic-prod`，九项门禁 9/9 全绿，真实域名 https 外部验证通过）。opic-prd-env（99.0.37.10/11/12/165 + 跳板 10.26.8.131）当日自所有可达位置均不可达，经权衡先行单机落地；**prd-env 恢复后的扩展路径不变**（§二）：数据迁 Pigsty HA、应用面横向扩、本机降级为接入节点。
+
+| # | 方案设定 | 实际落地 | 原因 |
+|:--:|---|---|---|
+| 1 | 3/4 节点 HA | **单机**（无 HA） | prd-env 不可达；该机为 opic-ontology 专属机，已清空 DEV |
+| 2 | Pigsty 主机级数据面 | ~~容器化数据面~~ → **✅ Pigsty 单机已落地并完成数据面切换**（2026-10-02，见 §11.1a） | 初始因多租户暂缓；专机清理后补装 |
+| 3 | 入口 80/443 | **✅ 已达成标准 80/443**（同日晚） | 专机清理后旧 nginx 入口退役（配置归档 `/root/retired-nginx-conf/`），Traefik 升级为标准入口；http→https 301 重定向 |
+| 3b | — | 泛域名 `*.opic-ai.ccoe.tech`（规则定版）+ **子域收编**：auth / casdoor / temporal / nats 四子域已入 Traefik（websecure） | 用户规则 ②；DNS A 记录已指 192.168.3.200 |
+| 4 | 企业证书 | **自签通配符 CA**（`certs/ca.crt`，`*.opic-ai.ccoe.tech`，需分发给访问方导入信任） | 企业 CA/O-CRT 未就绪；替换 = 覆盖 certs/fullchain.pem+key.pem 后重启 traefik |
+| 5 | Harbor https 8443 | http :18700 | 镜像客户端免证书配置；企业证书到位后随 §2.3 收编 |
+| 6 | 域名 `*.opic.example.com` | **`*.opic-ai.ccoe.tech`（规则定版）**；ZITADEL issuer = `https://auth.opic-ai.ccoe.tech:19443` | 域名已生效且完成 ZITADEL 重初始化；后续如再换域名 = 改 ZITADEL_DOMAIN + 证书 + 重建 ZITADEL 库（越晚换代价越大） |
+
+### 11.1a Pigsty 落地补记（2026-10-02，用户确认执行 P0~P2 后完成）
+
+专机清理完成、多租户障碍消失后，按 §四 P0~P2 **补装 Pigsty 单机并完成数据面切换**：
+
+| 项 | 实施结果 |
+|---|---|
+| 安装 | Pigsty v4.5.0 单机（`/root/pigsty`，定制 `pigsty.yml`）；`deploy.yml` PLAY RECAP ok=265 / failed=0 |
+| PG 集群 | `opic-pg`（PG16，Patroni Leader running）＋ etcd 单成员（**12379/12380**，避让 k8s etcd 2379/2380）＋ haproxy（**5433 rw / 5434 ro**） |
+| 建库 | `opicdb`（opicdb_owner）+ `zitadel` + `casdoor` 声明式创建；**23 中心 schema 随数据恢复** |
+| 数据迁移 | 容器 opic-pg → Pigsty：pg_dumpall -g + 逐库 pg_restore（**0 错误**）；校验 opicdb schemas=23 / zitadel instances=1 / casdoor tables=47 |
+| 应用切换 | `.env` `PG_HOST=host.docker.internal`、`PG_PORT=5433`、`HOST_GW_IP=172.20.0.1`；zitadel/casdoor 重建后 healthz 200（跑在 Pigsty 上） |
+| 旧容器 | `opic-pg` 容器已停（fallback 保留）；Redis 仍为容器（`opic-redis`，Pigsty Redis 模块待后续） |
+| 监控 | Grafana **:3000**（admin）＋ VictoriaMetrics **:8428**（pigsty 4.5 metrics 后端，非 9090）＋ vector 日志 |
+| 关键适配 | ① `postgres` 角色口令需显式 ALTER（pigsty 建后为 NULL）；② haproxy 后端由 pgbouncer:6432 **改直连 5432**（pgbouncer 用户认证与现网口令不符，弃用池子）；③ pg_hba 补 127.0.0.1/32 + docker 网段（intra 已含 172.16/12）；④ region=china（默认源直连会挂起） |
+
+### 11.1b 专机清理记录（2026-10-01 晚）
+
+按「与 opic-ai 无关的容器全部清除」指令执行：主机容器 95 → **17**（清除 66 + 孤儿网络 8：go-admin-kit 全套 13、OCM/oc-*/ocm-* 17、各 McC 中心 9、zt-* 4、orekenta 2、netbox 7、oauth2-proxy 3、pigsty 监控 4、opic-registry/opic-techbase-web 2、杂项 5）。**数据卷与 bind-mount 数据未删**（可按各项目仓重建）。误伤与恢复：Harbor 的 redis/registry/registryctl 三容器命名不带前缀被误清 → 经安装器 compose 重建（全组件 healthy）；`/opt/opic-prod` 曾因 rsync 多源误平铺损伤目录结构 → 已从本地仓完整恢复并重生成证书（**新 ca.crt 需重新分发导入**）。系统 nginx（host 服务）随旧 MVP 入口退役：stop + disable，配置归档。
+
+### 11.2 生产档配置基线（192.168.3.200）
+
+- 部署根 `/opt/opic-prod`（.env 即 .env.prod，600）；数据 `/opt/opic/{database,redis,harbor,nats,temporal}`；备份 `/opt/opic-backup`（cron 每日 02:00，保留 14 天，首次备份已验证）。
+- 端口（11.1b 后定版）：**Traefik 80(http,301→https)/443(https)**；dashboard 127.0.0.1:18887（仅本机）；子域路由：`auth. / casdoor. / temporal. / nats.opic-ai.ccoe.tech`（均 443）；直连 fallback 口保留：casdoor 18001、nats 14222/8222、temporal 7233/8233、harbor 18700、pg 127.0.0.1:15432、redis 127.0.0.1:26379、zitadel break-glass 127.0.0.1:18082。
+- 域名（规则定版）：`*.opic-ai.ccoe.tech → 192.168.3.200`；入口 `https://auth.opic-ai.ccoe.tech:19443`（ZITADEL issuer）。后续中心接入即按 `casdoor./harbor./nats./temporal.opic-ai.ccoe.tech` 子域规划（现经 IP 直连端口，收编 Traefik 随企业证书）。
+- 建库（§四.附规则已生效）：`opicdb` + **23 中心 schema**（opicdb_owner 属主，门禁校验）＋ zitadel/casdoor 独立库 + temporal 栈内库。
+- 凭据：唯一事实源 `/opt/opic-prod/.env`；DEV 时代凭据已随环境销毁（备份归档于工作区 `output/credentials-archive/`，仅本机）。
+
+### 11.3 扩容触发条件（单机 → 集群）
+
+以下任一发生即启动 §二 标准拓扑迁移：① prd-env 网络恢复；② 中心开始上量（并发/存储水位 >60%）；③ 出现可用性 SLA 要求。迁移 = pg_dumpall → Pigsty HA 导入 → 应用面改 PG_HOST → 按门禁复验。
+
+---
+
+*本文件为生产形态部署方案的 v1.0 基线；单机生产档已于 2026-10-01 落地（§十一）；标准多节点拓扑待 prd-env/专用机就位后按 §二 回填执行；变更走 116/118 台账追加。*
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/techbase/onboarding/index.md
+================
+
+# 技术底座 · 新人培训入门
+
+> 环境准备/本地启动/代码结构/开发流程——新人一天上手
+
+---
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+> 本文为 [opic-techbase](https://gitcode.com/opic-ontology/opic-techbase) 仓库 `docs/ONBOARDING.md` 的官网镜像（事实源在该仓）。
+
+## 1. 这是什么
+
+OPIC 技术底座（opic-techbase）是 OPIC 智能算力平台的**第一能力中心**，同时是其余 22 个能力中心的**工程模板**（新中心从本仓库 fork）。单体 Gin 后端 + React 19 双界面（用户工作台 / 管理控制台），技术栈对齐 [gopherforge](https://github.com/SuperiorChuo/gopherforge)。
+
+一句话架构：
+
+```
+浏览器 ── Traefik(https, *.opic-ai.ccoe.tech) ── 前端容器(nginx)
+        └─ /api /health /metrics ── techbase 容器(Gin :9680)
+              ├─ PostgreSQL(Pigsty opicdb, schema otechbase)
+              ├─ NATS JetStream(OPIC_TECHBASE / opic.techbase.>)
+              ├─ Temporal(opic ns / techbase 队列)
+              └─ Redis(可选, 会话吊销)
+身份: 管理台 ZITADEL SSO / 工作台 Casdoor SSO / 本地账号
+```
+
+## 2. 环境准备（Mac/Linux）
+
+| 工具 | 版本 | 用途 |
+|---|---|---|
+| Go | ≥ 1.23 | 后端 |
+| Node.js | ≥ 20 | 前端 |
+| Docker | 最近版 | 容器构建/依赖栈 |
+| PostgreSQL 客户端 psql | 16 | 数据库操作 |
+
+## 3. 本地首次启动（10 分钟）
+
+```bash
+git clone https://gitcode.com/opic-ontology/opic-techbase.git && cd opic-techbase
+go mod download && (cd frontend && npm install)
+cp configs/config.yml configs/config.local.yml   # 按需改数据库指向
+
+make dev          # 后端 :9680（或 go run ./cmd/techbase）
+cd frontend && npm run dev   # 前端 :5173，代理 /api → localhost:9680
+```
+
+默认账号：`admin / admin123`（本地登录入口，带图形验证码）。登录后：工作台办客户申请，管理控制台管用户/角色/流程/模型。
+
+## 4. 代码结构（gopherforge 布局）
+
+```
+cmd/techbase/       组合根：配置→日志→PG(goose)→种子→Gin→优雅退出
+configs/            config.yml（env > yaml > 默认）
+internal/
+  api/              routes.go 公开组+登录组+admin 组；auth/business/flow/adminconsole 控制器
+  service/          业务逻辑（事务边界在此层）
+  store/            gorm 封装（List/One/Count/Exec）
+  middleware/       登录鉴权 / 权限 / 操作审计
+  config/ infra/    配置与基础设施接线（事件总线/Temporal worker）
+pkg/                可复用件：metrics/llmcfg/temporalflow/errcode/eventbus/workflowx/…
+migrations/         goose SQL 迁移（禁止 AutoMigrate，改表结构只走这里）
+frontend/           React19 + antd（src/pages 用户侧 / src/admin 控制台侧）
+deploy 产线镜像     Dockerfile（多阶段）+ docker-compose.yml
+```
+
+三条铁律：
+1. **改表结构只写 `migrations/`**（goose SQL，带 `-- +goose Up`），禁止 AutoMigrate；
+2. **错误码不得自造**，统一 `pkg/errcode` 注册（格式 `[3位大写字母][4位数字]`，AMC 统一管理）；
+3. **响应一律 OPIC 信封** `{"returnInfo":{"returnCode":"SUC0000"},"data":...}`（用 `common.OKJSON/FailJSON`）。
+
+## 5. 开发流程（TDD + Conventional Commits）
+
+1. 从 `main` 拉分支（`feat/xxx`），先写测试再实现（`go test ./...`）；
+2. 提交信息：`feat|fix|refactor|docs|test|chore|perf|ci: 中文摘要`；
+3. 自测清单：`make build test lint` + 前端 `npx tsc --noEmit`；
+4. 合回 `main`（唯一活跃分支 = 发布基准；发布时打 `vX.Y.Z` tag）。
+
+## 6. 关键业务入口（拿来熟悉代码）
+
+| 功能 | 后端 | 前端 |
+|---|---|---|
+| 登录/SSO/验证码 | `internal/api/auth/` | `src/pages/login/` |
+| 客户申请（示例业务） | `internal/api/business/customer.go` | `src/pages/customer/` |
+| Temporal 流程设计器 | `internal/api/adminconsole/temporalflow.go` + `pkg/temporalflow/` | `src/pages/flow/TemporalFlowDesigner.tsx` |
+| AI 助理（多模型） | `internal/api/business/assistant.go` + `pkg/llmcfg/` | `src/components/AIAssistantPanel.tsx`、`AIChatWorkspace.tsx` |
+| 隔离信息/监控 | `internal/api/adminconsole/isolation.go`、`pkg/metrics/` | `src/admin/ai/IsolationInfo.tsx` |
+
+## 7. 下一步阅读
+
+- 编译与部署 → [部署指南](/docs/techbase/deployment)
+- 日常运维/监控/备份 → [运维手册](/docs/techbase/operations)
+- 踩坑速查 → [FAQ](/docs/techbase/faq)
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/techbase/deployment/index.md
+================
+
+# 技术底座 · 编译与部署
+
+> 构建矩阵/生产部署/迁移回滚/多中心 fork checklist
+
+---
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+> 本文为 [opic-techbase](https://gitcode.com/opic-ontology/opic-techbase) 仓库 `docs/DEPLOYMENT.md` 的官网镜像（事实源在该仓）。
+
+## 1. 构建矩阵
+
+| 产物 | 命令 | 说明 |
+|---|---|---|
+| 后端二进制 | `make build` | `bin/techbase` |
+| 前端产物 | `cd frontend && npm run build` | `frontend/dist` |
+| 本地全套 | `make dev` + `npm run dev` | :9680 / :5173 |
+| 生产镜像 | `make deploy-prod`（服务器侧构建） | 见下文 |
+
+## 2. 生产部署（make deploy-prod）
+
+生产部署**一条命令**，流程为"源码上服务器 → 服务器侧 docker build → compose 拉起"：
+
+```bash
+make deploy-prod
+# 等价于：
+# 1) rsync 源码 → root@192.168.3.200:/opt/opic-prod/apps/techbase-src/
+# 2) 服务器 docker build（--network host 绕 DNS 脏条目）：techbase + techbase-frontend 两镜像
+# 3) 拷贝 compose/configs/CA 到 /opt/opic-prod/apps/techbase/
+# 4) compose up -d（Traefik websecure 入口，BASE_DOMAIN=opic-ai.ccoe.tech）
+# 5) 健康验证：curl -ks https://techbase.opic-ai.ccoe.tech/health/live
+```
+
+部署要点（踩坑沉淀）：
+- **构建必须在服务器侧**（`--network host`）：本地构建 arm64 镜像无法在 amd64 主机运行；
+- **迁移文件随包走**：`migrations/` 由 rsync 同步，goose 启动自动执行（漏传迁移会卡版本）；
+- **凭据不进 git**：`/opt/opic-prod/apps/techbase/.env`（JWT_SECRET 等，chmod 600）首启自动生成；
+- 部署是**滚动重建**：无内省内库，前后端镜像同时更新。
+
+## 3. 运行形态与依赖
+
+```
+compose 栈（opic-net 网络）
+  opic-techbase-app       Gin :9680（DB 池 5~20 / metrics 开关 METRICS_ENABLED）
+  opic-techbase-frontend  nginx（静态 + /api 反代）
+入口 Traefik :443         techbase.opic-ai.ccoe.tech
+依赖（step1 基础设施栈，先行存在）
+  Pigsty opicdb:5433(schema=otechbase) / NATS opic-nats:4222 / Temporal :7233 / Redis / ZITADEL / Casdoor
+```
+
+环境变量全集见 `configs/config.yml` 注释（env > yaml > 默认），常用项：
+
+| 变量 | 说明 |
+|---|---|
+| `CENTER_CODE` | 中心域码（隔离三件套命名根，fork 时必须改） |
+| `AUTH_MODE` / `USER_AUTH_MODE` | 管理台 zitadel / 工作台 casdoor（SSO 默认入口） |
+| `METRICS_ENABLED` | /metrics 开关（默认 true，经 Pigsty vmetrics 抓取） |
+
+## 4. 迁移与回滚
+
+- **数据库迁移**：goose 自动执行 `migrations/*.sql`（按版本号递增）。新增迁移只追加文件，不改历史文件。
+- **应用回滚**：`git checkout <上一 tag> && make deploy-prod`（镜像重建覆盖）。
+- **迁移回滚**：goose down 需手写 down 段；生产原则"前向修复"（新增反向迁移）。
+
+## 5. 多中心 fork 部署差异（fork 后 checklist）
+
+新能力中心从本仓库 fork 后必改：
+1. `CENTER_CODE=<新域码>` → schema 自动变为 `o<域码>`、NATS 流 `OPIC_<域码>`、主题 `opic.<域码>.>`、Temporal 队列 `<域码>`；
+2. ZITADEL/Casdoor 各注册独立 OIDC 应用（中心间 SSO 隔离）；
+3. 业务表沿用独立 schema，迁移文件从零版本起。
+
+以上隔离边界可在管理控制台「系统工具 → 隔离信息」页实时查看。
+
+## 6. 离线安装介质包（社区/DEMO）
+
+无外网环境一键搭建完整演示栈（step1 基础设施 + 技术底座，Traefik 网关形态，介质约 650MB）。
+
+完整操作指引见《[技术底座 · 离线安装介质包](/docs/techbase/offline-kit)》。
+
+## 7. 常见部署故障
+
+| 现象 | 处置 |
+|---|---|
+| 404（接口存在却打不到） | 查后端路由是否注册（gin 重复注册会 panic，缺注册 404） |
+| 本地构建后服务器跑不起来 | 平台架构不一致——用服务器侧构建 |
+| 迁移卡住不执行 | 检查 `migrations/` 是否随 rsync 上传、goose 版本表是否脏 |
+| 容器 DNS 解析异常 | compose `extra_hosts` 补域名→host-gateway（宿主 /etc/hosts 有 127.0.0.1 映射） |
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/techbase/operations/index.md
+================
+
+# 技术底座 · 运维手册
+
+> 健康检查/监控告警/日志体系/数据面/备份/凭据/故障速查
+
+---
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+> 本文为 [opic-techbase](https://gitcode.com/opic-ontology/opic-techbase) 仓库 `docs/OPERATIONS.md` 的官网镜像（事实源在该仓）。
+
+## 1. 日常健康检查
+
+```bash
+# 存活/就绪（ready 含 DB ping，503=数据库不可达）
+curl -sk https://techbase.opic-ai.ccoe.tech/health/live
+curl -sk https://techbase.opic-ai.ccoe.tech/health/ready
+
+# 容器状态
+ssh root@192.168.3.200 'docker ps --format "{{.Names}} {{.Status}}" | grep techbase'
+```
+
+## 2. 监控与告警（Pigsty 栈）
+
+| 项 | 入口 |
+|---|---|
+| 指标抓取 | VictoriaMetrics `:8428`（job=techbase，经 Traefik 抓 /metrics，file_sd 5s 刷新） |
+| Grafana 面板 | `http://192.168.3.200:3000` →「OPIC 技术底座 · 应用监控」：up / QPS / 5xx 率 / P95 / goroutine / DB 连接池 |
+| 告警规则 | vmalert `/infra/rules/techbase.yml`：应用失联(critical)、5xx 率>5%(warning)、DB 池≥16(warning) |
+
+接入配置归档于 opic-deploy 仓 `observability/techbase/`（`install.sh` 幂等安装）。
+
+## 3. 日志体系（三页面 + 采集）
+
+- **操作日志**：`/api/admin/*` 写操作由 OperationAudit 中间件自动记录（action=OPERATE，请求体摘要含敏感字段脱敏）；
+- **审计日志**：业务动作显式埋点（SUBMIT/APPROVE/REJECT/RETURN，覆盖 V1 审批与 Temporal 任务）；
+- **登录日志**：LOGIN/LOGOUT；
+- 以上落 `audit_logs` 表，管理控制台「日志审计」三视图查询。NATS 访问日志/应用 stdout 走 `docker logs opic-techbase-app`。
+
+## 4. 数据面（Pigsty 纳管）
+
+| 库/Schema | 用途 |
+|---|---|
+| opicdb.otechbase | 业务数据（19 表，goose 迁移至 v3） |
+| casdoor | Casdoor 身份库 |
+| temporal / temporal_visibility | Temporal 持久化（2026-10-03 迁入，旧 pgdata 目录 `/opt/opic/temporal/pgdata` 保留可回滚） |
+| NATS | 无外部数据库——JetStream 文件存储 `/opt/opic/nats/data/jetstream`，随部署目录备份 |
+
+隔离边界实时视图：管理控制台「系统工具 → 隔离信息」。
+
+## 5. 备份与恢复
+
+- Pigsty 自带备份（pgbackrest，Pigsty 栈纳管）覆盖全部库；
+- NATS JetStream：随 `/opt/opic` 部署目录周期备份（BACKUP_DIR）；
+- 应用无状态：镜像 + git 任意重建；`.env`（凭据）务必备份且勿入库。
+
+## 6. 凭据管理（台账制）
+
+统一在 `192.168.3.200:/opt/opic-prod/.env`（chmod 600）：ZITADEL_ADMIN_PASSWORD、ZITADEL_TECHBASE_ADMIN_PASSWORD（admin）、TEMPORAL_PG_PASSWORD 等。**口令不进 git、不进聊天记录归档**。管理员 SSO：登录名 `admin`。
+
+## 7. 常见运维任务
+
+```bash
+# 重启应用
+ssh root@192.168.3.200 'cd /opt/opic-prod/apps/techbase && set -a && source .env && set +a && \
+  set -a && source /opt/opic-prod/.env && set +a && BASE_DOMAIN=opic-ai.ccoe.tech \
+  TRAEFIK_ENTRYPOINT=websecure docker compose restart'
+# 看实时日志
+ssh root@192.168.3.200 'docker logs -f --tail 100 opic-techbase-app'
+# Temporal 栈（独立 compose）
+ssh root@192.168.3.200 'cd /opt/opic-prod/stacks/temporal && docker compose ps'
+```
+
+## 8. 故障速查
+
+| 症状 | 首查 | 处置 |
+|---|---|---|
+| 整页打不开 | Traefik/容器状态 | `docker ps`；Traefik 面板看路由 |
+| /health/ready 503 | Pigsty/haproxy :5433 | haproxy 状态、opicdb 连接 |
+| 接口 401 | SSO/会话 | 重新登录；查 ZITADEL/Casdoor 可达性 |
+| 接口 404 | 路由注册 | 前后端契约比对（gin 重复注册会 panic） |
+| AI 助理"暂时不可用" | 模型账号 | 管理台「AI 模型配置」点测试；看 `docker logs | grep assistant` |
+| 流程不流转 | Temporal | UI :8088？→ Temporal UI 容器；查 worker（techbase 内嵌）日志 |
+| SQL 42601 类 | 业务空参数 | 空集合勿拼 `IN ()`（已修 todo/done，新增查询注意） |
+
+更多历史踩坑 → [FAQ](/docs/techbase/faq)。
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/techbase/faq/index.md
+================
+
+# 技术底座 · FAQ 实战踩坑
+
+> SSO/SQL/部署/前端/AI 助理 18 条真实排障记录
+
+---
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+> 本文为 [opic-techbase](https://gitcode.com/opic-ontology/opic-techbase) 仓库 `docs/FAQ.md` 的官网镜像（事实源在该仓）。
+
+## 登录与 SSO
+
+**Q1：管理员 SSO 登录报"系统中未找到用户"？**
+登录名写错。ZITADEL 实例域名是 `zitadel.auth.opic-ai.ccoe.tech`，不是文档示例的 `zitadel.localhost`。且管理控制台 SSO 应使用底座管理员账号：登录名 `admin`（口令见 `/opt/opic-prod/.env` 的 `ZITADEL_TECHBASE_ADMIN_PASSWORD`），它会映射本地 admin 并保留管理权限。`zitadel-admin@...` 是 ZITADEL 平台自身的实例管理员，登录成功也只会开通普通业务账号。
+
+**Q2：ZITADEL 登录报"无法为用户创建会话"？**
+登录 UI 对密码校验失败的通用提示——**口令不对**。API 侧可用 `POST /v2/sessions` 验证口令（注意该接口必须带任意 Bearer 头，否则报 "auth header missing"）。
+
+**Q3：Casdoor 登录页只有"Sign in with Face ID"，无法输密码？**
+应用配置被初始化成了仅 FaceID。修 casdoor 库 `application` 表：`enable_password=t`、`signin_methods=[{"name":"Password",...}]`，改后 `docker restart opic-casdoor`。
+
+**Q4：SSO 回调 401 "access token invalid"？**
+三层都可能，按序排查：① casdoor 应用 `expire_in_hours=0`（token 签发即过期）→ 设 168；② 应用 `cert` 字段必须为**裸名**（如 `cert-built-in`，带 owner 前缀会拼成三段报错）；③ 客户端代码 userinfo discovery 误用了另一个 IdP 的配置（多 IdP 共用 pkg 时高发）。
+
+**Q5：ZITADEL 授权后 404（`http://域名:443/ui/v2/login/...`）？**
+https 端口收到明文 http。修两处：compose 的 LoginV2 URL 改 `https://域名`（无端口）；**存量实例**还须 `PUT /v2/features/instance` 更新 `loginV2.baseUri`（带 `required:true`，否则 v2 特性被关掉落到 v1 路径）。
+
+## 接口与数据库
+
+**Q6：接口报 SQLSTATE 42601 "syntax error at or near \")\""？**
+空集合拼了 `IN ()`。动态 IN 列表前必须判空（无角色用户查待办即此坑），空时改按其他条件过滤。
+
+**Q7：保存/更新接口 404，但 GET 正常？**
+后端漏注册对应 method 的路由（如只注册了 POST 而前端用 PUT）。gin 缺路由返回 404 而非 405；补路由时注意**更新语义要从路径参数或 body 取 id**，否则更新会落进 INSERT 分支报"编码已存在"。
+
+**Q8：接口返回 200 但前端拿到空数据？**
+响应没包 OPIC 信封。axios 拦截器只认 `returnInfo.returnCode='SUC0000'` 并取 `data` 字段——裸 JSON/错误响应会被静默吞掉。统一用 `common.OKJSON/FailJSON`。
+
+**Q9：gorm Raw 查询数字字段类型断言失败？**
+PG smallint→int16、int→int64、numeric→float64。取值助手 `service.Int()` 已兼容，勿直接 `.(int)`。
+
+## 部署与基础设施
+
+**Q10：本地构建的镜像服务器跑不起来？**
+Apple Silicon 产出 arm64 镜像。生产一律服务器侧构建（`make deploy-prod` 已内置 `--network host`，同时解决构建期 DNS 脏条目）。
+
+**Q11：容器内解析公司域名到 127.0.0.1？**
+宿主 `/etc/hosts` 把 `*.opic-ai.ccoe.tech` 指向 127.0.0.1，Docker DNS 转发会继承。compose 给相关服务加 `extra_hosts: 域名=host-gateway`；https 自签证书再加 CA 挂载 + `SSL_CERT_FILE`。
+
+**Q12：docker compose 改了镜像/配置不生效？**
+`docker compose up -d` 只重建配置变化的容器；**改镜像必须确认镜像 ID 变了**（构建缓存可能命中旧层）。restart 不会换镜像。
+
+**Q13：Pigsty 监控（VictoriaMetrics）加了抓取目标不生效？**
+Pigsty 的 prometheus.yml 以 YAML 文档结束符 `...` 结尾——追加内容必须在 `...` **之前**，否则解析失败、热加载被拒（旧配置保留）。YAML 合法性先本地校验。
+
+**Q14：vmetrics/grafana 等是 docker 还是系统服务？**
+Pigsty 全部为 **systemd 服务**（vmetrics:8428 / vmalert:8880 / grafana:3000 / alertmanager / node_exporter / pg_exporter），非容器。Grafana 面板放 `/etc/dashboards/`（Pigsty provider 扫描路径）自动加载。
+
+## 前端
+
+**Q15：接口 200 但页面拿到的对象字段是 null 导致白屏？**
+Go 空 slice 序列化为 `null` 而非 `[]`。返回给前端的列表字段必须 `make([]T, 0)` 初始化。
+
+**Q16：按钮样式被全局主题覆盖（内联样式无效）？**
+品牌 CSS 用了 `!important`。覆盖它需要同优先级写法（相同属性选择器 + 置于文件末尾），或新增专用类。
+
+## AI 助理
+
+**Q17：助理回复固定话术（不走大模型）？**
+LLM 调用失败自动降级规则引擎。`docker logs | grep assistant` 看降级原因；管理台「AI 模型配置」对账号点「测试」。kimi-for-coding 仅允许默认温度（账号温度须为 0 即不发送）。
+
+**Q18：新增模型账号后 AI 助理选择器不显示？**
+账号需「启用」；前端模型选择持久化在 localStorage，切换账号后刷新页面即可见。
+
+
+================
+Source: https://project-opic.github.io/opic-website/docs/techbase/offline-kit/index.md
+================
+
+# 技术底座 · 离线安装介质包
+
+> step1 基础设施 + opic-techbase 离线一键部署——社区运营/拓展用户/DEMO 演示环境搭建（Traefik 网关形态,约 650MB 介质,10 分钟拉起）
+
+---
+
+LLMS 索引： [llms.txt](/opic-website/llms.txt)
+
+---
+
+> 本文为 [opic-deploy](https://gitcode.com/opic-ontology/opic-deploy) 仓库 `offline-kit/README.md` 的官网镜像（事实源在该仓）。
+
+面向**社区运营 / 拓展用户 / DEMO 演示**的单机离线安装介质：无需外网，导入镜像、执行一条脚本，10 分钟内获得一套完整可演示的 OPIC 环境。
+
+## 一、介质包内容
+
+| 组件 | 版本（打包锁定） | 用途 |
+|---|---|---|
+| PostgreSQL | 16-alpine | 数据面（多库：opicdb/casdoor/zitadel/temporal） |
+| Redis | 8.10.2-alpine | 会话吊销等 |
+| NATS | 2.14-alpine | 事件总线（JetStream） |
+| Temporal | auto-setup 1.29.0 + UI 2.34.0 | 工作流引擎 |
+| Casdoor / ZITADEL / ZITADEL-Login | latest / v4.19.3 | 用户/管理员 SSO（可选档） |
+| **opic-techbase** 后端 + 前端 | v3.2.0（latest tag） | 技术底座应用本体 |
+
+## 二、制作介质包（源机器，需可访问生产/镜像源）
+
+```bash
+cd offline-kit
+bash pack.sh v3.2.0        # 产出 opic-offline-kit-v3.2.0.tar.gz + .sha256
+```
+> 说明：`pack.sh` 会自动从生产 Harbor 给 techbase 镜像打通用别名（`opic/techbase:latest`）。Pigsty 属于生产级数据面安装器（systemd 全家桶），**DEMO 档不含**；社区/演示用介质内 postgres 官方镜像承载多库，生产化时按《技术底座·运维手册》接入 Pigsty。
+
+## 三、目标机安装（离线，一条命令）
+
+要求：Linux x86_64、Docker 已装、磁盘 ≥ 20GB、端口 8081/15432/16379/14222/17233/18088 空闲。
+
+```bash
+tar xzf opic-offline-kit-v3.2.0.tar.gz && cd kit
+bash install.sh               # core 档：本地登录，完整演示
+bash install.sh --with-sso    # 附带 Casdoor/ZITADEL SSO 组件
+bash install.sh --check-only  # 仅前置检查
+```
+
+脚本自动完成：镜像导入 → 随机口令生成（写入 `.env`）→ 数据库多库初始化 → 服务拉起 → 健康等待 → 输出访问信息。
+
+## 四、安装结果与演示脚本
+
+安装完成输出访问入口与账号（示例）：
+
+```
+访问入口:    http://<目标机IP>:8081
+默认账号:    admin / admin123（本地登录,带图形验证码）
+Temporal UI: http://<目标机IP>:18088
+```
+
+**建议演示动线（约 8 分钟）**：
+1. 本地登录（展示图形验证码安控）→ 用户工作台
+2. 客户申请：新建草稿 → 提交 → 审批中心审批通过（流程留痕）
+3. 管理控制台：仪表盘 → 流程设计器（可视化编辑/保存并发布/试运行）
+4. AI 智能助理（右下角）：选模型提问；系统工具 → AI 模型配置（多供应商账号管理）
+5. 系统工具 → 隔离信息（MCC 中心级隔离边界一览）/ 日志审计 / 系统监控
+
+## 五、开启 SSO（可选）
+
+`--with-sso` 拉起后：
+- Casdoor `http://<IP>:18001`（内置 admin/123，请立即改密）；在 Casdoor 建应用并将 techbase 的工作台登录方式切换为 Casdoor（`USER_AUTH_MODE=casdoor` + Casdoor Issuer/ClientId 等 env，见 `configs/casdoor-app.conf.template` 与 techbase 部署指南）；
+- ZITADEL `http://<IP>:18080`（首建管理员 `zitadel-admin@zitadel.localhost`，口令见 `.env` 的 `ZITADEL_ADMIN_PASSWORD`）；管理控制台 SSO 按 techbase 部署指南「ZITADEL 接入」注册 OIDC 应用。
+
+## 六、数据与配置
+
+| 位置 | 内容 |
+|---|---|
+| `.env` | 全部随机口令（务必备份） |
+| `runtime/initdb/01-init.sql` | 数据库初始化（首启生成） |
+| docker volume `opic-demo_pgdata` / `natsdata` | 业务数据与事件（`docker compose down` 不删除；`down -v` 才清） |
+
+## 七、常见问题
+
+| 问题 | 处理 |
+|---|---|
+| 端口冲突 | 改 `.env` 对应 `_PORT` 后重新 `install.sh`（或 `docker compose up -d`） |
+| 镜像导入失败 | 确认 images/ 目录完整（对照 `.sha256`） |
+| 前端打不开 | `docker logs opic-demo-frontend`；确认 8081 未被占用 |
+| 想重置全部数据 | `docker compose -p opic-demo -f docker-compose.demo.yml down -v && rm -rf runtime/initdb && bash install.sh` |
+
+## 八、从 DEMO 到生产
+
+DEMO 档为**单机单实例演示形态**。生产部署差异：
+1. 数据面替换为 Pigsty（PG 高可用 + 监控，见《技术底座·运维手册》）；
+2. 入口换成 Traefik + 泛域名 https（`*.opic-ai.ccoe.tech`）+ 正式证书；
+3. SSO 按生产手册完整对接（ZITADEL Login 组件 / 应用注册 / 角色映射）；
+4. 镜像走 Harbor 私仓（`make deploy-prod` 流水线）。
+
+

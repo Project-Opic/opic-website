@@ -1,0 +1,13 @@
+# OPIC Open Intelligent Computing Platform
+
+## Site index
+
+- [Home page](https://project-opic.github.io/opic-website/en/)
+- [navigation.json](https://project-opic.github.io/opic-website/en/navigation.json)
+- [Docs](https://project-opic.github.io/opic-website/en/)
+- [Blog](https://project-opic.github.io/opic-website/en/)
+
+## Site locales
+
+- [简体中文](https://project-opic.github.io/opic-website/)
+- [English](https://project-opic.github.io/opic-website/en/)
